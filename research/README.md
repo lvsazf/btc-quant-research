@@ -1,29 +1,27 @@
-# BTC quant research archive
+# BTC quant research and engine snapshot
 
-Public source archive for historical Bitget BTC/USDT:USDT research using Freqtrade 2026.9. **Not an adopted trading strategy, not investment advice, not a live-trading deployment.** No exchange account or credentials are required for the archived research.
+This single repository contains the complete tracked Freqtrade 2026.9 source snapshot at the repository root, with project-specific historical research under `research/`. **No adopted trading strategy, investment advice or live-trading deployment is provided.**
 
-## Status
+## Layout
 
-- `smoke/`: minimal framework and accounting smoke research, not a trading recommendation.
-- `sr-h1-v1/`: frozen Structure Reclaim H1 v1, reference rules, native Freqtrade adapter, tests, and historical audit scripts.
-- Historical decision: **REJECT_FROZEN_CANDIDATE**, with insufficient trade-count evidence. Publishing the code does not change that decision.
-- Original protocols are historical frozen artifacts, including their old dates and constraints. They do not define current monitoring schedules or current approved risk limits.
-- This is a source preservation snapshot. No new backtest result is claimed by this commit.
+- Repository root: all 782 files tracked by official Freqtrade commit `1f394eaebc2f46a83d26971388628707802f8602`, including source, tests, documentation, example configurations, licenses and upstream-tracked binary fixtures/build resources.
+- `research/smoke/`: minimal framework and accounting smoke research.
+- `research/sr-h1-v1/`: frozen Structure Reclaim H1 v1, reference rules, native adapter, tests and historical audit scripts.
+- `research/SOURCE_MANIFEST.json`: hashes for 37 original research artifacts, with paths relative to `research/`.
+- `research/UPSTREAM_MANIFEST.json`: every upstream tracked path, file mode, Git blob SHA and SHA-256. Upstream paths are relative to repository root.
 
-## Runtime
+Official source: https://github.com/freqtrade/freqtrade
 
-Official upstream: https://github.com/freqtrade/freqtrade
+Version: `2026.9`. Original upstream tree: `669d5e1f6c067a36048344fc0b97256a195c4fbe`.
 
-Version: `2026.9`; commit: `1f394eaebc2f46a83d26971388628707802f8602`.
+This is a complete tracked source snapshot, **not the full upstream Git history**, a fork relationship, submodule, virtual environment or ready-running service. Future engine changes can be committed in this same repository, separately from strategy changes.
 
-The recovered runtime uses an isolated Python virtual environment and an editable install of the unmodified upstream checkout. It is not a Docker image. Official engine source is not vendored here. Dependency snapshots are under `smoke/installed-requirements.txt` and `sr-h1-v1/upstream_version/`.
+## Research status and limits
 
-## What is and is not preserved
+The frozen historical decision remains **REJECT_FROZEN_CANDIDATE**, with insufficient trade-count evidence. Publication does not adopt the strategy or claim a new backtest. Historical dates and research limits do not define current monitoring schedules or approved trading constraints.
 
-Preserved: original custom Python scripts, research strategy, execution adapter, frozen protocol and hashes, tests, credential-empty research configurations, dependency versions, manifests and the historical adoption decision.
+Original research source bytes are preserved, including old absolute cloud paths. Original `REPRODUCE.txt` files describe the original complete evidence package: their statements that research datasets are included do not apply to this public repository. Official upstream test datasets are distinct from those missing project-specific research inputs.
 
-Excluded: credentials, account balances/identifiers, virtual environments, caches, official source checkout, raw market datasets, generated trade/results archives and runtime logs. Configurations have `dry_run: true`; that is a safety setting, not evidence that live paper trading was started. Do not run `trade` or expose an API server from this archive.
+No private credentials, account information, recovered virtual environment, runtime logs, user market-data collection or generated project backtest archives are included. Upstream's already-tracked public test data and wheel files are intentionally retained for source-tree completeness. Credential-empty research configurations have `dry_run: true`; this is not evidence of an active paper-trading process. Do not infer permission to run trading or expose an API server.
 
-`SOURCE_MANIFEST.json` records each copied source file's SHA-256. Source bytes are preserved, including historical absolute paths. Original `REPRODUCE.txt` files describe the original complete evidence package, not the smaller public archive; their statements that datasets are included do **not** apply to this repository.
-
-See [RESTORE.md](RESTORE.md) for recovery boundaries, and [PUBLICATION_REVIEW.md](PUBLICATION_REVIEW.md) for inspection scope.
+See [RESTORE.md](RESTORE.md) for recovery and upgrade boundaries, and [PUBLICATION_REVIEW.md](PUBLICATION_REVIEW.md) for inspection scope. The official root README and license files remain unmodified.

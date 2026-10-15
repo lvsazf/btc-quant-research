@@ -1,27 +1,25 @@
 # Publication review
 
-Reviewed 2026-10-15 for publication as a historical research archive.
+Reviewed 2026-10-15 for a public historical research archive plus complete official source snapshot.
 
-## Scope and checks
+## Research additions
 
-- 37 copied source artifacts are enumerated individually in `SOURCE_MANIFEST.json`, with original package-relative paths, byte sizes and SHA-256 digests. They are preserved byte-for-byte rather than silently modernized.
-- Every selected file was inspected for credential-related fields, personal paths, external URLs, identity/contact strings and licensing indicators. Pattern scanning found no GitHub tokens, AWS access-key identifiers, private-key blocks or populated password/token/API-key assignments.
-- All four configuration files have empty exchange key, secret and password fields, `dry_run: true`, and disabled Telegram integration. They are historical research configurations, not evidence of an active service or safe authorization for live trading.
-- All 16 Python files parsed successfully with Python's AST parser. This is syntax validation only, not a new backtest or an end-to-end runtime test.
-- No symbolic links, virtual environments, full upstream checkout, raw market datasets, trade/account databases, runtime logs, caches or credentials are included.
-- Public exchange names, synthetic test fixtures, research assumptions and historical aggregate rejection evidence are included. No private account position or actual trade evidence is asserted.
+The original 37 copied artifacts remain byte-for-byte preserved and are individually enumerated in `SOURCE_MANIFEST.json`. All 16 Python files passed AST syntax parsing. All four research configurations use `dry_run: true`, empty exchange credentials and disabled Telegram integration. No new backtest or runtime test is claimed by these publication checks.
 
-These checks reduce accidental disclosure risk; they are not a guarantee against every possible secret format. New changes require fresh review.
+Pattern scanning and inspection of selected research files found no populated credentials, private-key blocks or personal account information. No private market-data collection, virtual environment, generated project result archives or runtime logs are included.
+
+## Official source snapshot
+
+All 782 files tracked by official commit `1f394eaebc2f46a83d26971388628707802f8602` are included at repository root without excluding tracked files. Their modes, Git blob IDs, SHA-256 digests and sizes are in `UPSTREAM_MANIFEST.json`. The upstream tree hash is `669d5e1f6c067a36048344fc0b97256a195c4fbe`.
+
+The upstream working tree was clean before copying. No embedded `.git`, recovered virtual environment or untracked runtime files are part of the snapshot. The tracked `ft_client/LICENSE` symbolic link targets `../LICENSE` and is preserved as a symlink. Already-tracked wheels, public test-market fixtures and documentation images are retained deliberately; they are not user credentials or recovered user runtime data. They were not executed as part of publication.
+
+Secret-pattern inspection of textual upstream files produced five candidate locations: an explicitly truncated RSA-key example in exchange documentation, an expired 2020 JWT example in REST API documentation, and three fixed test-token values in RPC tests. These are public upstream illustrative/test content, not user secrets; they remain unchanged to preserve the official source snapshot. These checks are not a guarantee against every possible secret format, and new changes require fresh review.
 
 ## Provenance and licensing
 
-The source package names and hashes record archive provenance, not a claim of exclusive authorship for every line. Freqtrade is an external upstream dependency at the commit recorded in `README.md`. Its existing GPL-3.0 license text is retained in the respective upstream-license files; its complete source tree is not vendored here.
+The root source snapshot retains all official licensing and copyright notices. Original research package paths and hashes document archive provenance, not exclusive authorship of every line. Adapters depend on Freqtrade interfaces. No blanket MIT or other new project license has been added. Review custom-code provenance and derivative-work obligations before selecting a license for additions.
 
-Adapter code depends on Freqtrade interfaces. No blanket MIT or other new project license is granted by this archive. A separate provenance and derivative-work licensing review is required before choosing a project license or advertising the repository as fully licensed open source. Public visibility alone does not supply reuse rights.
+## Limits
 
-## Known limitations
-
-- Historical absolute cloud paths remain in copied sources and dependency snapshots. See `RESTORE.md`; this is not a one-command portable distribution.
-- Raw input data and full runtime evidence are intentionally excluded. Data manifests describe inputs but are not those inputs.
-- The rejected frozen candidate remains rejected. Historical dates, research limits and protocol assumptions are not current trading permissions or adopted strategy rules.
-- Publication does not start a process, schedule synchronization, execute a strategy or place an order.
+The frozen research rejection remains unchanged. Old absolute paths require deliberate restoration or a separately reviewed portability change; this repository is not a turnkey backtest distribution. Full upstream Git history, private inputs and active processes are not included. Publication neither adopts a strategy nor starts a service, automatic synchronization or a trade.
