@@ -1,0 +1,34 @@
+{
+  "D0": {
+    "tests": {
+      "net_positive": false,
+      "profit_factor_above_one": false,
+      "at_least_30_trades": false,
+      "first_quarter_10_trades": false,
+      "second_quarter_10_trades": false,
+      "first_quarter_net_positive": false,
+      "second_quarter_net_positive": false
+    },
+    "all_pass": false
+  },
+  "D1": {
+    "tests": {
+      "net_positive": false,
+      "profit_factor_above_one": false,
+      "at_least_30_trades": false,
+      "first_quarter_10_trades": false,
+      "second_quarter_10_trades": false,
+      "first_quarter_net_positive": false,
+      "second_quarter_net_positive": false
+    },
+    "all_pass": false
+  },
+  "stress": {
+    "D0": false,
+    "D1": false
+  },
+  "passed": false,
+  "decision": "REJECT_FROZEN_CANDIDATE",
+  "count_evidence_insufficient": true,
+  "unseen_holdout": false
+}

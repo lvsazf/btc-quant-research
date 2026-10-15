@@ -1,0 +1,22 @@
+Run from /workspace/shared/freqtrade-smoke-20261011 in this temporary environment.
+No trade/live command is needed or authorized. All artifacts are research probes.
+
+Environment and source:
+  git clone --depth 1 --branch 2026.9 https://github.com/freqtrade/freqtrade.git upstream
+  git -C upstream rev-parse HEAD
+Expected commit: 1f394eaebc2f46a83d26971388628707802f8602
+  UV_CACHE_DIR="$PWD/.uv-cache" uv venv .venv
+  UV_CACHE_DIR="$PWD/.uv-cache" uv pip install --python .venv/bin/python --index-url https://pypi.org/simple -r upstream/requirements.txt -e upstream pytest
+  .venv/bin/freqtrade --version
+
+Existing fixture JSON is included. prepare_fixture.py rebuilds it from existing source CSVs in this environment; it explicitly zeroes funding only in the labelled gross ablation.
+  .venv/bin/python -m pytest -q
+  .venv/bin/freqtrade list-strategies --userdir user_data
+  TZ=UTC .venv/bin/freqtrade backtesting --config config-gross.json --userdir user_data --datadir user_data/data/gross --timerange 20261001-20261008 --cache none --export trades --backtest-directory user_data/backtest_results/gross
+  TZ=UTC .venv/bin/freqtrade backtesting --config config-net.json --userdir user_data --datadir user_data/data/net --timerange 20261001-20261008 --cache none --export trades --backtest-directory user_data/backtest_results/net
+  TZ=UTC .venv/bin/freqtrade lookahead-analysis --config config-net.json --userdir user_data --datadir user_data/data/net --timerange 20261001-20261008 --minimum-trade-amount 5 --targeted-trade-amount 10 --lookahead-analysis-exportfilename lookahead-results.csv
+  .venv/bin/python audit_results.py
+
+audit_results.py requires exactly one gross and one net archive, intentionally refusing ambiguous multiple reruns. Select explicit archives in a separate audit directory when repeating.
+The package retains installed-requirements.txt, input hashes, original native result archives, logs and failed attempts. The full upstream repo/.venv are intentionally excluded from the evidence ZIP.
+The current successful network configuration uses already-configured environment proxies and system trust stores, retaining TLS verification. A different machine may not need those parameters.

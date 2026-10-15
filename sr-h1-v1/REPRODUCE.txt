@@ -1,0 +1,18 @@
+Current verified environment: /workspace/shared/freqtrade-smoke-20261011/.venv
+Official Freqtrade 2026.9 commit: 1f394eaebc2f46a83d26971388628707802f8602
+
+This is a research-only package, not a live-trading deployment or portable one-click installer.
+All original source inputs and paths are recorded in data_manifest.json and migration_contract_frozen.json.
+The evidence archive includes the source CSVs and frozen rules for inspection; restore their recorded paths or explicitly adjust paths before attempting reproduction elsewhere.
+
+From /workspace/shared/freqtrade-sr-h1-v1-20261011:
+  /workspace/shared/freqtrade-smoke-20261011/.venv/bin/python -m pytest -q
+  TZ=UTC /workspace/shared/freqtrade-smoke-20261011/.venv/bin/python run_research.py --run
+  /workspace/shared/freqtrade-smoke-20261011/.venv/bin/python summarize_research.py
+
+The first command runs the complete 14-test project suite, including native integration. It reads public Bitget market metadata; it does not access an account. Existing proxy and system CA options preserve TLS verification.
+The second command runs all25 frozen combinations and writes per-combination result.json/native_results_frame.json/trades.csv, logging actual UTC start/end and freezing code hashes before outcomes. Running again overwrites same-labelled research result files; keep an evidence copy before re-running.
+The third command derives performance, opportunity counts, principal close-marked curves and the original adoption gates without changing any trades.
+
+Raw signals, candidate versions, rejected attempts and invalidations are in each result.json. all_trades.csv contains180 scenario rows, not180 independent trades. Missing actual funding raises an error rather than zero-filling.
+No trade/live/service command is needed or authorized. No parameter search was run. The original frozen strategy and protocol are unchanged.

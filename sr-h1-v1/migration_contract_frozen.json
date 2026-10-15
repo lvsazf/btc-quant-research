@@ -1,0 +1,56 @@
+{
+  "frozen_at_utc": "2026-10-11T19:10:54.257076+00:00",
+  "research_id": "SR-H1-v1-FREQTRADE-2026.9-migration",
+  "no_parameter_search": true,
+  "unseen_holdout": false,
+  "upstream_commit": "1f394eaebc2f46a83d26971388628707802f8602",
+  "frozen_inputs": {
+    "strategy_proposal_zh.txt": {
+      "path": "/workspace/shared/btc-structure-reclaim-v1-20261011/strategy_proposal_zh.txt",
+      "sha256": "c934c3fd597cd52d1ccdce8f1bfeb8433c225342d6e7af268b9224dffdd1fa70"
+    },
+    "protocol_frozen.json": {
+      "path": "/workspace/shared/btc-structure-reclaim-v1-20261011/protocol_frozen.json",
+      "sha256": "8ded9de8bd7a1cb4da4289127ee48cd150ffd7e62af55e06ab7ec1c43cd147bd"
+    },
+    "engine.py": {
+      "path": "/workspace/shared/btc-structure-reclaim-v1-20261011/engine.py",
+      "sha256": "b477ef089dc9a10d9f1bda32c4911b7c29589ad4e5a61fd1c98ef601d9ab194f"
+    }
+  },
+  "architecture": "Freqtrade Backtesting subclass uses upstream event loop, Order, LocalTrade, Wallets and serialization. IStrategy owns causal raw signal/candidate state. Imported reference pure indicator/risk/exit functions only; reference simulate() never called for historical results.",
+  "semantic_resolutions": {
+    "H4": "Latest complete UTC 4H with close_time <= decision boundary; full prehistory SMA20-seeded EMA, 100 completed H4 warmup; no segment reset",
+    "funding": "(entry, settlement <= exit_funding_through]; entry-equality excluded, exit-equality included. Protocol scenario both sides pay adverse 1bp/8h on raw entry. Actual-covered scenario uses signed real rate times hourly mark open proxy; missing actual rate is error, not zero. Admission uses prespecified adverse funding, not future rate.",
+    "tail": "Causal entries retained. Report-time censor every entry with entry+6h open unavailable, even if earlier SL/TP happened. Force exits never principal PnL.",
+    "candidate": "Invalidations first, then raw signal: no_target before suppression; single active candidate or native open position; no queue or same-hour reversal; lock SL/TP at t0; expiry strict3h",
+    "fills": "Market execution overrides supported subclass methods to permit adverse fills beyond OHLC rather than native clipping. SL/TP reach uses raw OHLC only. SL gap first, 6h timeout next, then SL before TP; TP gaps fixed target.",
+    "intrabar_timestamp": "Native ledger exit proxy bar_end-1ms, funding_through=bar_open. Open gap/timeouts exact open.",
+    "reserve": "Explicit entry reserve0.01% included in native entry fee field as fee+reserve, split in independent ledger.",
+    "hour03": "H1 D0/D1/D2 remain explicitly hourly-open proxies. Sparse existing minute coverage cannot produce whole-period :03 portfolio; produce coverage/gap analysis, do not interpolate or treat H1 open as :03. No historical notification receipts means actual delay cannot be claimed."
+  },
+  "runs": {
+    "primary": [
+      "earlier",
+      "validation"
+    ],
+    "variants": [
+      "D0",
+      "D1",
+      "D2",
+      "D0_SLIP5BP",
+      "D1_SLIP5BP"
+    ],
+    "sequence": [
+      "gross_no_cost_ablation_using_same_frozen_cost_admission",
+      "protocol_cost_assumptions_full_period",
+      "actual_funding_covered_subperiod"
+    ],
+    "actual_funding_subperiod": "2026-07-13T00:00:00Z to 2026-10-10T18:00:00Z",
+    "capital_each_run": 1000,
+    "risk_budget": 20,
+    "notional_cap": 1000,
+    "leverage_cap": 2
+  },
+  "adoption": "Exactly original pre-specified D0/D1 validation and quarterly/count/stress screen; actual funding portion is diagnostic, not substitute for required full validation. Failure => reject this frozen candidate; insufficient count => insufficient evidence separately. No live adoption."
+}

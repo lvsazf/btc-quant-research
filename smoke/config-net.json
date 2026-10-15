@@ -1,0 +1,62 @@
+{
+  "max_open_trades": 1,
+  "stake_currency": "USDT",
+  "stake_amount": 200,
+  "dry_run_wallet": 1000,
+  "tradable_balance_ratio": 0.99,
+  "dry_run": true,
+  "trading_mode": "futures",
+  "margin_mode": "isolated",
+  "timeframe": "1h",
+  "strategy": "SmokeHourlyResearch",
+  "user_data_dir": "/workspace/shared/freqtrade-smoke-20261011/user_data",
+  "datadir": "/workspace/shared/freqtrade-smoke-20261011/user_data/data/net",
+  "dataformat_ohlcv": "json",
+  "fee": 0.0006,
+  "entry_pricing": {
+    "price_side": "other",
+    "use_order_book": false
+  },
+  "exit_pricing": {
+    "price_side": "other",
+    "use_order_book": false
+  },
+  "unfilledtimeout": {
+    "entry": 10,
+    "exit": 10,
+    "unit": "minutes"
+  },
+  "exchange": {
+    "name": "bitget",
+    "key": "",
+    "api_key": "",
+    "secret": "",
+    "password": "",
+    "ccxt_config": {
+      "timeout": 10000
+    },
+    "ccxt_async_config": {
+      "timeout": 10000,
+      "aiohttp_trust_env": true,
+      "options": {
+        "include_OS_certificates": true
+      }
+    },
+    "pair_whitelist": [
+      "BTC/USDT:USDT"
+    ],
+    "pair_blacklist": [],
+    "enable_ws": false
+  },
+  "pairlists": [
+    {
+      "method": "StaticPairList"
+    }
+  ],
+  "telegram": {
+    "enabled": false,
+    "token": "",
+    "chat_id": ""
+  },
+  "force_entry_enable": false
+}

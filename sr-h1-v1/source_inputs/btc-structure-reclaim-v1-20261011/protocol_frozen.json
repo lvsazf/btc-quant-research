@@ -1,0 +1,208 @@
+{
+  "adoption": {
+    "D0_D1_each": [
+      "net > 0",
+      "profit_factor > 1",
+      "completed trades >= 30",
+      "first 3 months completed trades >= 10",
+      "second 3 months completed trades >= 10",
+      "first 3 months net > 0",
+      "second 3 months net > 0"
+    ],
+    "negative_or_nonpositive_required_positive": "Reject candidate when net/segment/stress fails required sign; count insufficiency separately marks insufficient evidence",
+    "no_inference": "Passing is a research screen, not proven edge or live deployment approval",
+    "not_user_standing_rule": true,
+    "stress_D0_D1_each": "5bp per-side slippage net >= 0",
+    "validation_only": true
+  },
+  "candidate": {
+    "cancellation": "Known post-t0 completed H1 SL touch, H1 close at/inside boundary, or fixed TP touch; completed 4H direction invalid; current known open at/beyond SL or TP. All cancellations and exact expiry before delay_wait; completed bar SL then close then TP, trend, current open SL then TP, expiry.",
+    "delay": "D0 at corresponding t0 open, D1 waits one hour, D2 two hours; skipped hours still process all known invalidations.",
+    "inside_quote": "At/inside boundary quote alone rejects current quote, but does not cancel without completed H1 close evidence.",
+    "no_queued_signals": true,
+    "one_active": true,
+    "quote": "long boundary < current open < TP; short TP < current open < boundary",
+    "ratio": "cost-adjusted full-TP net / cost-adjusted original-SL loss >= 1",
+    "suppression_order": "raw no_target recorded before suppression. A valid-target raw signal with active candidate/position is suppressed and never reinserted. Existing position still active at same timestamp takes precedence even if an open exit will follow.",
+    "window": "t0 <= entry_time < t0 + 3 hours"
+  },
+  "costs": {
+    "actual_funding": "all settlements actually held, based on exit funding_through",
+    "baseline_slippage_each_side": "0.0002",
+    "extra_adverse_USDT_per_BTC_each_side": "1",
+    "fee_each_side": "0.0006",
+    "fill_entry": "raw*(1+direction*slippage)+direction*1, adverse tick rounding",
+    "fill_exit": "raw*(1-direction*slippage)-direction*1, adverse tick rounding",
+    "funding_UTC_hours": [
+      0,
+      8,
+      16
+    ],
+    "funding_base": "raw entry quote * quantity, both long and short pay",
+    "funding_each_8h": "0.0001",
+    "no_double_count": "Execution slippage/spread/rounding are contained in fills, decomposed for reporting but not deducted twice",
+    "planned_funding": "all settlements in (entry, entry+6h] at full quantity",
+    "reserve_once_on_entry_fill_notional": "0.0001",
+    "rounding": "Against trader on entry and exit",
+    "stress_slippage_each_side": "0.0005",
+    "tick": "0.1"
+  },
+  "data_policy": {
+    "contiguous_hourly_source_required": true,
+    "current_299_hour_sample": "Less than 100 complete 4H warmup; cannot support eligible main results. No opportunity/return claim from it.",
+    "duplicates": "Reject",
+    "gaps": "Report data insufficient and do not run a portfolio across a gap",
+    "incomplete_H1": "Exclude any H1 with close_time > run end"
+  },
+  "evaluation": {
+    "account_reset": "Each large period starts flat with equity 1000; indicators do not reset. Period results cannot be added as one compounded year. Initial signal may use completed pre-period bars. Validation midpoint does not reset account.",
+    "earlier_purpose": "description and implementation verification only, never parameter choice",
+    "run_timing": "Record actual UTC start/end per period and variant; protocol hash must match. All implementation defect corrections logged and all fixed runs repeated.",
+    "sequence": [
+      "earlier",
+      "validation"
+    ],
+    "signal_membership": "start <= t0 < end",
+    "tail": "Causal execution first; report-time censor any trade without observed entry+6h open, even if earlier exit observed. Censored trades excluded from principal P&L. Never filter entries using future availability."
+  },
+  "execution": {
+    "entry_lookahead": "Only current open known for admission; never use current H/L to reject entry",
+    "funding_open_order": "Exit exactly at settlement includes funding; entry exactly at settlement excludes already passed funding",
+    "gap_stop": "worse current open if past SL",
+    "gap_target": "fixed TP, not favorable gap open",
+    "holding": "Original SL and TP only; no exits due to new 4H direction or H1 close reversal",
+    "intrabar_ambiguity": "SL first if SL and TP both touched in one bar",
+    "intrabar_exit": "timestamp proxy bar_end-1ms; funding through bar_open only",
+    "maximum_hold_hours": 6,
+    "proxy": "Hourly opens only, not :03 or actual 15-minute fills",
+    "timeout": "entry+6h current open; before current bar HL, after known gap SL",
+    "variants": [
+      {
+        "delay": 0,
+        "name": "D0",
+        "slippage": "0.0002"
+      },
+      {
+        "delay": 1,
+        "name": "D1",
+        "slippage": "0.0002"
+      },
+      {
+        "delay": 2,
+        "name": "D2",
+        "slippage": "0.0002"
+      },
+      {
+        "delay": 0,
+        "name": "D0_SLIP5BP",
+        "slippage": "0.0005"
+      },
+      {
+        "delay": 1,
+        "name": "D1_SLIP5BP",
+        "slippage": "0.0005"
+      }
+    ]
+  },
+  "frozen_at_utc": "2026-10-11T17:58:57.050195+00:00",
+  "h1_signal": {
+    "b0": "previous complete H1 immediately before b1",
+    "b1": "latest complete H1",
+    "boundary": "long b0.high; short b0.low",
+    "long": "b0.close < b0.open and b1.close > b0.high and b1.low > b0.low",
+    "raw": "trend and H1 pattern match; one raw signal per t0. No target raw signals logged as no_target, not candidates.",
+    "short": "b0.close > b0.open and b1.close < b0.low and b1.high < b0.high",
+    "stop": "long b0.low - 0.1; short b0.high + 0.1",
+    "t0": "b1.open_time + 1 hour"
+  },
+  "history_expected_rows": 26304,
+  "history_paths": [
+    "/workspace/shared/btc-quant-research-20261010/v2/data/ohlcv_1h.csv",
+    "/workspace/shared/btc-quant-research-20261010/data/ohlcv_1h.csv"
+  ],
+  "history_previously_researched": true,
+  "hypothesis": "A completed one-hour recovery from a one-hour pullback in an established four-hour trend may resume to the nearest already observed confirmed swing structure.",
+  "modification_policy": "Never overwrite frozen protocol. Implementation bugs may be fixed only to conform to this protocol, with red regression evidence and all historical runs repeated; parameter changes require new independent protocol and are outside this task.",
+  "parameter_rationale": {
+    "100_4H_warmup": "Stabilizes SMA-seeded EMA before eligibility",
+    "3h_entry_6h_hold": "Short bounded stale-signal exposure and identical execution comparison",
+    "4H_EMA20": "Separately establishes direction on a slower timeframe without selecting a winning lookback",
+    "72h_2x2_swing": "Finite recent observed market structure, confirmation delay explicitly causal",
+    "costs": "Prespecified adverse execution and funding stresses, not inferred historical realized costs",
+    "one_H1_pullback_reclaim": "Tests immediate recovery after a single opposite-color hour, rather than another N-hour breakout",
+    "ratio_1": "Minimum full-cost reward/risk hypothesis, unproven; fixed before outcomes"
+  },
+  "periods": {
+    "earlier": {
+      "end": "2026-04-10T18:00:00Z",
+      "start": "2025-10-10T18:00:00Z"
+    },
+    "validation": {
+      "end": "2026-10-10T18:00:00Z",
+      "midpoint": "2026-07-10T18:00:00Z",
+      "start": "2026-04-10T18:00:00Z"
+    }
+  },
+  "protocol_id": "BTC-4H-H1-STRUCTURE-RECLAIM-v1",
+  "purpose": "One fixed hypothesis; no parameter selection, trading, deployment or changes to existing tasks.",
+  "report": [
+    "raw/no_target/suppressed/candidates/cancel reasons/cost-ratio rejects/completed/censored separate counts",
+    "net/trade count/win rate/profit factor/mean median per-trade net",
+    "planned ratio distribution and actual net/planned risk distribution",
+    "maximum losing streak",
+    "realized and close-marked drawdown in USDT and peak percent",
+    "largest actual loss",
+    "planned risk/notional/margin compliance",
+    "long/short/month/exit-route detail",
+    "gross and all cost components"
+  ],
+  "sizing": {
+    "dynamic_equity": true,
+    "entry_fill_notional_limit": "1000",
+    "initial_equity": "1000",
+    "leverage_limit": "2",
+    "maintenance_caveat": "Only simulation pressure, not actual exchange liquidation model",
+    "maintenance_simulation_stress": "0.005",
+    "margin_capacity": "equity/(entry_fill/2 + entry_fill*fee + entry_fill*0.005 + planned_loss_per_BTC)",
+    "minimum_check": "full single quantity times minimum of entry, fixed SL exit, fixed TP exit stressed fills >= 5",
+    "minimum_single_leg_notional": "5",
+    "minimum_single_leg_quantity": "0.0001",
+    "planned_risk_limit": "20",
+    "quantity": "floor(max(0,min(20/planned_loss,1000/entry_fill,margin_capacity)),0.0001)",
+    "quantity_step": "0.0001"
+  },
+  "target": {
+    "center_before": "center.open < b0.open",
+    "center_window": "center.open >= t0 - 72 hours",
+    "confirmation": "rightmost confirmation bar close_time <= t0",
+    "equal_price": "latest center for source metadata",
+    "left_bars": 2,
+    "lock": "one full-quantity TP locked at t0; never move. No projections or fallback R target. No target means no candidate.",
+    "long_choice": "smallest swing high price strictly greater than b1.close",
+    "right_bars": 2,
+    "short_choice": "largest swing low price strictly less than b1.close",
+    "source": "strict confirmed observed H1 swing high for long, swing low for short",
+    "strict": true
+  },
+  "trend": {
+    "complete_only": true,
+    "ema_alpha": "2/21",
+    "ema_period": 20,
+    "ema_seed": "SMA of first 20 complete four-hour closes",
+    "incomplete_group": "excluded; update EMA on complete groups only",
+    "long": "latest completed 4H close > EMA20 and EMA20 > prior complete 4H EMA20",
+    "otherwise": "neutral, no raw signal; invalidates pending candidate",
+    "short": "latest completed 4H close < EMA20 and EMA20 < prior complete 4H EMA20",
+    "timeframe_hours": 4,
+    "utc_open_hours": [
+      0,
+      4,
+      8,
+      12,
+      16,
+      20
+    ],
+    "warmup_complete_four_hour_bars": 100
+  },
+  "unseen_holdout": false
+}

@@ -1,0 +1,261 @@
+[
+  {
+    "path": "smoke/REPRODUCE.txt",
+    "source_package": "freqtrade-smoke-20261011",
+    "source_relative_path": "REPRODUCE.txt",
+    "sha256": "8f7c8ca3782e0120da7bd15e770cd6842bda034d421b7d52ec3ef6d94d2bbf14",
+    "bytes": 2212
+  },
+  {
+    "path": "smoke/UPSTREAM_LICENSE.txt",
+    "source_package": "freqtrade-smoke-20261011",
+    "source_relative_path": "UPSTREAM_LICENSE.txt",
+    "sha256": "589ed823e9a84c56feb95ac58e7cf384626b9cbf4fda2a907bc36e103de1bad2",
+    "bytes": 35141
+  },
+  {
+    "path": "smoke/audit_results.py",
+    "source_package": "freqtrade-smoke-20261011",
+    "source_relative_path": "audit_results.py",
+    "sha256": "4bc056b28d55b1a191c14834af6526c0f7c3d203f183ec0ab4be23d1f903edec",
+    "bytes": 4866
+  },
+  {
+    "path": "smoke/config-gross.json",
+    "source_package": "freqtrade-smoke-20261011",
+    "source_relative_path": "config-gross.json",
+    "sha256": "b73fe549b0bcbc21ac2b45c765b05d2f306f46e4fd5c87c651c7ce457ee385f0",
+    "bytes": 1318
+  },
+  {
+    "path": "smoke/config-net.json",
+    "source_package": "freqtrade-smoke-20261011",
+    "source_relative_path": "config-net.json",
+    "sha256": "99332dc36875e0241a130705b41543460b5c8d42238635960817856de74a533b",
+    "bytes": 1319
+  },
+  {
+    "path": "smoke/fixture-manifest.json",
+    "source_package": "freqtrade-smoke-20261011",
+    "source_relative_path": "fixture-manifest.json",
+    "sha256": "bcdf2a22d21b9dfd2545de71bb01211193c2706467c9a90f8818e372d0b5d378",
+    "bytes": 1455
+  },
+  {
+    "path": "smoke/installed-requirements.txt",
+    "source_package": "freqtrade-smoke-20261011",
+    "source_relative_path": "installed-requirements.txt",
+    "sha256": "a1f766e65e157843ea237aece417a6b5257e8682a3cbbae0aaa67663779d697e",
+    "bytes": 1539
+  },
+  {
+    "path": "smoke/prepare_fixture.py",
+    "source_package": "freqtrade-smoke-20261011",
+    "source_relative_path": "prepare_fixture.py",
+    "sha256": "0b2f396fe6c974d146518654789c5ed7fda2b265b2afb863e91a54f81218c310",
+    "bytes": 4364
+  },
+  {
+    "path": "smoke/pytest.ini",
+    "source_package": "freqtrade-smoke-20261011",
+    "source_relative_path": "pytest.ini",
+    "sha256": "51442fa92d2fb80e9f777acc14038ad15af1301c8d18e23247703d44a046bcfe",
+    "bytes": 44
+  },
+  {
+    "path": "smoke/test_smoke_strategy.py",
+    "source_package": "freqtrade-smoke-20261011",
+    "source_relative_path": "test_smoke_strategy.py",
+    "sha256": "becbd66e95565f37883f83aa8d281ff5de5aca7fd21f42a37f500052792881e1",
+    "bytes": 3327
+  },
+  {
+    "path": "smoke/upstream-commit.txt",
+    "source_package": "freqtrade-smoke-20261011",
+    "source_relative_path": "upstream-commit.txt",
+    "sha256": "d99eb40f8827649111c2c0498b46be7e725efaa4dd71cc424f1bc813f90aa427",
+    "bytes": 41
+  },
+  {
+    "path": "smoke/user_data/strategies/SmokeHourlyResearch.py",
+    "source_package": "freqtrade-smoke-20261011",
+    "source_relative_path": "user_data/strategies/SmokeHourlyResearch.py",
+    "sha256": "4d508e8441cb9e2c43f8ee83e78e2effe87be24c87c58ea0581c7ba7b8341948",
+    "bytes": 3086
+  },
+  {
+    "path": "sr-h1-v1/REPRODUCE.txt",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "REPRODUCE.txt",
+    "sha256": "366c4dbf1ba7a2a4b3f806ae8f00a8a1e3aaf39401252d28fa22c5764ba7e342",
+    "bytes": 1885
+  },
+  {
+    "path": "sr-h1-v1/adoption_result.json",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "adoption_result.json",
+    "sha256": "45de3e606a62ca1b18420025b408009a9329a0713341dbad49faec0da6def52e",
+    "bytes": 841
+  },
+  {
+    "path": "sr-h1-v1/config-gross.json",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "config-gross.json",
+    "sha256": "9f01e67a99fd3e714c0fe8dab2d5fe915ba812d99ed696b8f41c6b91ad1b9866",
+    "bytes": 1334
+  },
+  {
+    "path": "sr-h1-v1/config-protocol.json",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "config-protocol.json",
+    "sha256": "a3bc6173729c0f5df2bf21433be51ea1dc76afc09951604823cad63de8188728",
+    "bytes": 1339
+  },
+  {
+    "path": "sr-h1-v1/data_manifest.json",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "data_manifest.json",
+    "sha256": "3d3e8d391d0b06fb3f8e44c5a192daa7b799cb5b6c23ab38aeff012247585d46",
+    "bytes": 611
+  },
+  {
+    "path": "sr-h1-v1/independent_audit/audit_historical_results.py",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "independent_audit/audit_historical_results.py",
+    "sha256": "8f03035a431e12d7093f2a010dd64b4edbc2e9e185064a930a76965cab498076",
+    "bytes": 13781
+  },
+  {
+    "path": "sr-h1-v1/independent_audit/audit_native_adapter.py",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "independent_audit/audit_native_adapter.py",
+    "sha256": "e743d87868cb056a8fc18503d0abef61f6faa73624dad9b4c9d68a0aecec2e3f",
+    "bytes": 8101
+  },
+  {
+    "path": "sr-h1-v1/migration_contract_frozen.json",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "migration_contract_frozen.json",
+    "sha256": "6b18a509a684f6f678a1f463e10851f21e526c5b6f54b381a55bd3d125adfa75",
+    "bytes": 3689
+  },
+  {
+    "path": "sr-h1-v1/migration_contract_frozen.sha256",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "migration_contract_frozen.sha256",
+    "sha256": "585f80f2b66348d328702d2e05b94ce06514322cd31573716d0b28cb365675f1",
+    "bytes": 97
+  },
+  {
+    "path": "sr-h1-v1/run_research.py",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "run_research.py",
+    "sha256": "28bc2b345dabdec4dcd1fad4437d1076db07f0f9ecb12abb8496b66b161e5343",
+    "bytes": 9917
+  },
+  {
+    "path": "sr-h1-v1/source_inputs/btc-structure-reclaim-v1-20261011/engine.py",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "source_inputs/btc-structure-reclaim-v1-20261011/engine.py",
+    "sha256": "b477ef089dc9a10d9f1bda32c4911b7c29589ad4e5a61fd1c98ef601d9ab194f",
+    "bytes": 12119
+  },
+  {
+    "path": "sr-h1-v1/source_inputs/btc-structure-reclaim-v1-20261011/protocol_frozen.json",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "source_inputs/btc-structure-reclaim-v1-20261011/protocol_frozen.json",
+    "sha256": "8ded9de8bd7a1cb4da4289127ee48cd150ffd7e62af55e06ab7ec1c43cd147bd",
+    "bytes": 10321
+  },
+  {
+    "path": "sr-h1-v1/source_inputs/btc-structure-reclaim-v1-20261011/protocol_frozen.sha256",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "source_inputs/btc-structure-reclaim-v1-20261011/protocol_frozen.sha256",
+    "sha256": "edf9ea1063993f6e93eed8a54563680e35384dbaf4738166daf77ba584f5de0c",
+    "bytes": 87
+  },
+  {
+    "path": "sr-h1-v1/source_inputs/btc-structure-reclaim-v1-20261011/strategy_proposal_zh.txt",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "source_inputs/btc-structure-reclaim-v1-20261011/strategy_proposal_zh.txt",
+    "sha256": "c934c3fd597cd52d1ccdce8f1bfeb8433c225342d6e7af268b9224dffdd1fa70",
+    "bytes": 8217
+  },
+  {
+    "path": "sr-h1-v1/source_inputs/btc-structure-reclaim-v1-20261011/test_engine.py",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "source_inputs/btc-structure-reclaim-v1-20261011/test_engine.py",
+    "sha256": "30903b75441fa07ef7350cbab6c9b9dfc401e042ad85d3edce4905fe1fabb766",
+    "bytes": 9434
+  },
+  {
+    "path": "sr-h1-v1/sr_backtesting.py",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "sr_backtesting.py",
+    "sha256": "ddd9da08dcab1fdbbfa757052032e32e0235a199bbdcda7b080290a2af9a4f7b",
+    "bytes": 5583
+  },
+  {
+    "path": "sr-h1-v1/sr_support.py",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "sr_support.py",
+    "sha256": "62f04a096f162f4c1eab56daa3359d623e900adb4e516f7145b7cdeb2283edf9",
+    "bytes": 3981
+  },
+  {
+    "path": "sr-h1-v1/summarize_research.py",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "summarize_research.py",
+    "sha256": "f853bf1928609d8aaea7174713b6313ddc33147241fc7bd116c0ef31e5985137",
+    "bytes": 6729
+  },
+  {
+    "path": "sr-h1-v1/tests/test_migration.py",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "tests/test_migration.py",
+    "sha256": "4b6049ef7cd24d3f37ab4afb7495e915b8f4c31f32877c90a6c6900382e8b90d",
+    "bytes": 3137
+  },
+  {
+    "path": "sr-h1-v1/tests/test_native_integration.py",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "tests/test_native_integration.py",
+    "sha256": "d545e9b82e07b9fd4a9dccb2c571d5683a08e8be378391549fea037015d459df",
+    "bytes": 2639
+  },
+  {
+    "path": "sr-h1-v1/tests/test_reporting.py",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "tests/test_reporting.py",
+    "sha256": "c704f90f5558ed9629804e0ba07e8c322f6a04b13fd538e7d4ed8bec865f572f",
+    "bytes": 1173
+  },
+  {
+    "path": "sr-h1-v1/upstream_version/UPSTREAM_LICENSE.txt",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "upstream_version/UPSTREAM_LICENSE.txt",
+    "sha256": "589ed823e9a84c56feb95ac58e7cf384626b9cbf4fda2a907bc36e103de1bad2",
+    "bytes": 35141
+  },
+  {
+    "path": "sr-h1-v1/upstream_version/installed-requirements.txt",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "upstream_version/installed-requirements.txt",
+    "sha256": "a1f766e65e157843ea237aece417a6b5257e8682a3cbbae0aaa67663779d697e",
+    "bytes": 1539
+  },
+  {
+    "path": "sr-h1-v1/upstream_version/upstream-commit.txt",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "upstream_version/upstream-commit.txt",
+    "sha256": "d99eb40f8827649111c2c0498b46be7e725efaa4dd71cc424f1bc813f90aa427",
+    "bytes": 41
+  },
+  {
+    "path": "sr-h1-v1/user_data/strategies/StructureReclaimV1.py",
+    "source_package": "freqtrade-sr-h1-v1-20261011",
+    "source_relative_path": "user_data/strategies/StructureReclaimV1.py",
+    "sha256": "4a73b1b7d0846b893bc77e9b6523b229eb764f61f0fdd1598aa3f32716e84da6",
+    "bytes": 1813
+  }
+]
