@@ -59,22 +59,44 @@ def trigger_source(p,verified):
  if p.get('kind')=='MANUAL_RESEARCH_VALIDATION':return 'MANUAL'
  return 'UNKNOWN_NOT_INFERRED_FROM_TIMESTAMP'
 
-def review_status(invalid,valid_end,end):
- return 'INVALID_BACKTEST_PARTIAL' if invalid else 'PARTIAL_DAY_DIAGNOSTIC' if valid_end<end else 'BACKTEST_COMPLETE_OBSERVATION_COVERAGE_LIMITED'
+def review_status(invalid,valid_end,end,issues=(),full_observations=False):
+ if invalid:return 'INVALID_BACKTEST_PARTIAL'
+ if issues:return 'REVIEW_WITH_EVIDENCE_ISSUES'
+ if valid_end<end:return 'PARTIAL_DAY_DIAGNOSTIC'
+ return 'REVIEW_COMPLETE' if full_observations else 'BACKTEST_COMPLETE_OBSERVATION_COVERAGE_LIMITED'
+
+def exit_code(status):
+ return 1 if status=='BLOCKED_PARTIAL' else 2 if status in ('REVIEW_WITH_EVIDENCE_ISSUES','INVALID_BACKTEST_PARTIAL') else 0
+
+def terminal_receipt(path,p,digest):
+ receipt_path=path.parent/'state.json'
+ if not receipt_path.is_file():raise ValueError('Original terminal state unavailable; completion cannot be verified')
+ raw=receipt_path.read_bytes();state=json.loads(raw)
+ if state.get('status')!='COMPLETE':raise ValueError('Original round terminal state is not COMPLETE')
+ if state.get('round_id')!=p['round_id'] or state.get('archive_sha256')!=digest:raise ValueError('Original terminal receipt identity/archive mismatch')
+ return dict(path=str(receipt_path),sha256=sha(raw),state=state)
+
+def observation_coverage(rows,start,end):
+ expected=set(range(start+3*60000,end,H))
+ verified={int(datetime.datetime.fromisoformat(x['scheduled_utc']).timestamp()*1000) for x in rows if x['trigger_source']=='SCHEDULED_EXTERNALLY_VERIFIED'}
+ covered=expected & verified
+ return dict(observed_rounds=len(rows),scheduled_rounds=sum(x['trigger_source']=='SCHEDULED_EXTERNALLY_VERIFIED' for x in rows),unknown_trigger_rounds=sum(x['trigger_source']=='UNKNOWN_NOT_INFERRED_FROM_TIMESTAMP' for x in rows),manual_rounds=sum(x['trigger_source']=='MANUAL' for x in rows),expected_scheduled_slots=len(expected),verified_scheduled_slots=len(covered),missing_scheduled_slots_utc_ms=sorted(expected-covered),full_day_scheduled_observations=covered==expected,not_full_day=covered!=expected,warning='Coverage requires distinct externally verified scheduled slots and COMPLETE receipts; historical bars never backfill observations')
 
 def main():
  ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--date',required=True);ap.add_argument('--round',type=Path,action='append',required=True);ap.add_argument('--history-root',type=Path,required=True);ap.add_argument('--output',type=Path,required=True);ap.add_argument('--mark-supplement',type=Path);ap.add_argument('--verified-scheduled-round',action='append',default=[]);a=ap.parse_args()
  a.output.mkdir(parents=True,exist_ok=False)
  source_snapshot={p.name:p.read_bytes() for p in sorted(HERE.glob('*.py'))+[HERE/'PROTOCOL.json']}
- start,end=day_window(a.date);runtime=verify_runtime();packs=[];errors=[]
+ start,end=day_window(a.date);runtime=verify_runtime();packs=[];errors=[];receipts={}
  for path in a.round:
   try:
    p,digest=package(path)
+   receipt=terminal_receipt(path,p,digest)
+   receipts[p['round_id']]=receipt
    existing=next((old for old in packs if old[0]['round_id']==p['round_id']),None)
    if existing and existing[1]!=digest:raise ValueError('Conflicting archives for same round ID')
    if not existing:packs.append((p,digest,path))
   except Exception as e:errors.append(dict(path=str(path),error=str(e)))
- report=dict(version='BTC_DAILY_REVIEW_V1',research_version=VERSION,generated_utc=datetime.datetime.now(UTC).isoformat(),report_date_beijing=a.date,day_start_utc_ms=start,day_end_exclusive_utc_ms=end,backtest_fixed_start=START,runtime=runtime,adopted=False,orders_enabled=False,provenance=[dict(path=str(path),sha256=digest,round_id=p['round_id']) for p,digest,path in packs],input_errors=errors,stages=[])
+ report=dict(version='BTC_DAILY_REVIEW_V1',research_version=VERSION,generated_utc=datetime.datetime.now(UTC).isoformat(),report_date_beijing=a.date,day_start_utc_ms=start,day_end_exclusive_utc_ms=end,backtest_fixed_start=START,runtime=runtime,adopted=False,orders_enabled=False,provenance=[dict(path=str(path),sha256=digest,round_id=p['round_id']) for p,digest,path in packs],input_errors=errors,terminal_receipts=receipts,stages=[])
  try:
   if not packs:raise ValueError('No valid archived input')
   latest=max(packs,key=lambda x:body(x[0],'run/result.json')['closed_data_through_utc'])[0]
@@ -128,7 +150,7 @@ def main():
     row.update(status='MATCH' if all(x['matches'] for x in checks.values()) else 'MISMATCH',signals=checks)
    comparisons.append(row)
   report['round_comparisons']=comparisons
-  report['actual_observation_coverage']=dict(observed_rounds=len(comparisons),scheduled_rounds=sum(x['trigger_source']=='SCHEDULED_EXTERNALLY_VERIFIED' for x in comparisons),unknown_trigger_rounds=sum(x['trigger_source']=='UNKNOWN_NOT_INFERRED_FROM_TIMESTAMP' for x in comparisons),manual_rounds=sum(x['trigger_source']=='MANUAL' for x in comparisons),not_full_day=True,warning='Only explicitly supplied actual rounds are evidenced; historical bars never backfill observations')
+  report['actual_observation_coverage']=observation_coverage(comparisons,start,end)
   issues=[]
   if errors:issues.append('INVALID_INPUT_ARCHIVES')
   invalid=[name for name,r in results.items() if r['cumulative_frozen_terminal_liquidation']['status']!='COMPLETE']
@@ -137,7 +159,7 @@ def main():
   if valid_end<desired_end:issues.append('COST_DATA_GAP')
   if any(x['status']!='MATCH' for x in comparisons):issues.append('REPLAY_MISMATCH_OR_UNSUPPORTED_VERSION')
   report['optimization']=dict(status='REPAIR_EVIDENCE_FIRST' if issues else 'NO_RULE_CHANGE_JUSTIFIED_BY_THIS_CHECK',issues=issues,rule_change=False,reason='A short seen-data diagnostic and matching execution do not establish investment advantage. Preserve all frozen baselines; no daily forced parameter changes.',candidate_path='research/daily-review-v1/candidates/<new-version>/; freeze hypothesis, rule code, inputs, costs and falsification before running the same fixed comparisons; explicit adoption is separate')
-  report['status']=review_status(invalid,valid_end,end)
+  report['status']=review_status(invalid,valid_end,end,issues,report['actual_observation_coverage']['full_day_scheduled_observations'])
  except Exception as e:
   report.update(status='BLOCKED_PARTIAL',error=type(e).__name__+': '+str(e))
  report['daily_source_hashes']={n:sha(b) for n,b in source_snapshot.items()}
@@ -148,8 +170,8 @@ def main():
   b=p.read_bytes();files[str(p.relative_to(a.output))]=dict(sha256=sha(b),bytes=len(b),content=b.decode())
  for name,b in source_snapshot.items():
   files['source/'+name]=dict(sha256=sha(b),bytes=len(b),content=b.decode())
- write(a.output/'google-evidence.json',dict(kind='DAILY_REVIEW_PARTIAL_VALIDATION',report_date=a.date,files=files,source_archives=report['provenance']))
+ write(a.output/'google-evidence.json',dict(kind='DAILY_REVIEW_EVIDENCE',report_date=a.date,files=files,source_archives=report['provenance']))
  package(a.output/'google-evidence.json')
  print(json.dumps(dict(status=report['status'],output=str(a.output),backtest_coverage=report.get('backtest_coverage'),error=report.get('error')),ensure_ascii=False))
- return 1 if report['status']=='BLOCKED_PARTIAL' else 0
+ return exit_code(report['status'])
 if __name__=='__main__':sys.exit(main())

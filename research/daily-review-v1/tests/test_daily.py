@@ -29,3 +29,23 @@ class DailyTests(unittest.TestCase):
  def test_invalid_ledger_not_complete(self):
   from daily_review import review_status
   self.assertEqual(review_status(['T1'],5,5),'INVALID_BACKTEST_PARTIAL')
+ def test_evidence_issues_nonzero(self):
+  from daily_review import review_status,exit_code
+  for issue in ['INVALID_INPUT_ARCHIVES','REPLAY_MISMATCH_OR_UNSUPPORTED_VERSION']:
+   status=review_status([],5,5,[issue]);self.assertEqual(status,'REVIEW_WITH_EVIDENCE_ISSUES');self.assertEqual(exit_code(status),2)
+ def test_observations_not_inferred_from_backtest(self):
+  from daily_review import observation_coverage
+  self.assertFalse(observation_coverage([],0,86400000)['full_day_scheduled_observations'])
+  rows=[dict(scheduled_utc=__import__('datetime').datetime.fromtimestamp((i*3600000+180000)/1000,__import__('datetime').timezone.utc).isoformat(),trigger_source='SCHEDULED_EXTERNALLY_VERIFIED') for i in range(24)]
+  self.assertTrue(observation_coverage(rows,0,86400000)['full_day_scheduled_observations'])
+ def test_terminal_receipt_required_and_bound(self):
+  from daily_review import terminal_receipt
+  import tempfile,json
+  with tempfile.TemporaryDirectory() as d:
+   p=Path(d)/'archive.json'
+   with self.assertRaises(ValueError):terminal_receipt(p,{'round_id':'x'},'hash')
+   for state in [{'status':'FAILED'},{'status':'COMPLETE','round_id':'x','archive_sha256':'wrong'}]:
+    (p.parent/'state.json').write_text(json.dumps(state))
+    with self.assertRaises(ValueError):terminal_receipt(p,{'round_id':'x'},'hash')
+   (p.parent/'state.json').write_text(json.dumps({'status':'COMPLETE','round_id':'x','archive_sha256':'hash'}))
+   self.assertEqual(terminal_receipt(p,{'round_id':'x'},'hash')['state']['status'],'COMPLETE')

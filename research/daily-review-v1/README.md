@@ -25,3 +25,9 @@ This executable research path evaluates candidate, CASH, HOLD and unchanged T1/B
 ## Acceptance limits
 
 Current hand validation uses only saved 2026-10-16 manual and scheduled rounds, not a full day. Focused offline tests and real saved-input run evidence do not imply complete external Google/Sheets/notification acceptance or the full upstream suite. Source hashes and actual Git identity are recorded separately from the frozen economic version.
+
+## Completion and evidence gates
+
+Each supplied hourly archive must have its original adjacent state.json receipt with status COMPLETE, matching round_id and archive_sha256. A missing, failed or mismatched receipt is an explicit input evidence issue, not assumed completion. Receipt content/hash is retained in the daily report. When restoring from Google, restore the separately verified original receipt as well; the bundle's pre-packaging lifecycle snapshot is not a substitute for a terminal receipt.
+
+Backtest coverage and observation coverage are reported independently. Full scheduled observation coverage requires all 24 distinct Beijing-day hourly :03 slots with externally verified scheduled provenance and COMPLETE receipts; complete historical candles or a complete backtest never prove those observations happened. Package kind is neutral DAILY_REVIEW_EVIDENCE. REVIEW_WITH_EVIDENCE_ISSUES and INVALID_BACKTEST_PARTIAL exit 2; BLOCKED_PARTIAL exits 1. Exit 0 may still be PARTIAL_DAY_DIAGNOSTIC or coverage-limited, so consumers must inspect both explicit coverage sections rather than call all exit-0 reports full-day success.
