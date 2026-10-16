@@ -1,0 +1,10 @@
+[
+  {
+    "relative_path": "v2/data/ohlcv_1h.csv",
+    "sha256": "14f3e0166412fc0664a5894a0eeec7e73cf347fe26d12fd3fc71f22eb4b4e68a"
+  },
+  {
+    "relative_path": "data/ohlcv_1h.csv",
+    "sha256": "0dc68fff0ba731e5ea2cedf7e35c9c326608c444990052bccb7ad22f5cdccb0d"
+  }
+]

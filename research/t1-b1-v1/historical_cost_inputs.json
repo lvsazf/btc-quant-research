@@ -1,0 +1,10 @@
+[
+  {
+    "relative_path": "data/btcusdt_usdt_futures_funding.csv",
+    "sha256": "c1c7c8bbf8bc485a1a2b1257d4a5bb46c1884b37ffd418e9fdbcfab43e1c248b"
+  },
+  {
+    "relative_path": "data/btcusdt_usdt_futures_mark_1h_funding_window.csv",
+    "sha256": "436ada8ca39bde4611e5ab4052050d7c19ca71b91c74d6e4795932ee0a48e3f7"
+  }
+]

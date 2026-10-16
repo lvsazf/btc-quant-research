@@ -1,0 +1,23 @@
+{
+  "id": "BTC_T1_B1_FIXED_RESEARCH_V1_20261016",
+  "status": "research spike only, not adopted, no live execution",
+  "capital": 1000,
+  "instrument": "Bitget BTCUSDT USDT-FUTURES linear perpetual, not spot",
+  "candidates": [
+    "CASH: always cash, no assumed interest",
+    "HOLD: buy 90% of initial equity at first open then hold until end",
+    "T1: long when completed UTC daily close > SMA50 including that closed day, flat when below, equality preserves prior state",
+    "B1: long when completed UTC daily close > maximum high of prior20 complete UTC days excluding current; flat when close < minimum low of prior10 days excluding current; otherwise keep state"
+  ],
+  "initial_state": "T1/B1 start simulation according to causally precomputed daily state available at window start, using earlier data only as warmup. B1 state starts flat until first valid breakout. Fully complete contiguous UTC daily bars only. No price targets, trailing stops, shorts or pyramiding. Position may be held indefinitely until defined daily exit or test end.",
+  "sizing": "At each flat-to-long entry, use <=90% of current equity for notional inclusive entry fee, floor quantity0.0001BTC; all entry funds are own cash. No borrowing, external funds, leverage. Hold fixed quantity between signals. HOLD same initial90%; CASH zero exposure. Actual realized exposures differ, compare them explicitly.",
+  "risk": "No20USDT stop guarantee; original20 all-cost single-trade budget is not satisfied by these research hypotheses. Cash headroom=equity-minus-notional must remain>=0; if funding exhausts it, terminate INVALID_NO_LEVERAGE with true stop time; not exchange liquidation. Unknown historical contract/minimum order/margin rules preclude live suitability.",
+  "timing": "Compute signal after complete UTC daily close. D0 execute immediately at next hourly open at that boundary. D1 execute one hour later. Initial window entry also delayed one hour in D1 for all noncash strategies. Next-open proxies are not actual :03 bid/ask. Delayed decision cannot change retroactively. Funding occurs before timestamp trades on previously held quantity.",
+  "fees": "Taker0.0006 per side assumption; adverse spread/slippage combined0.0002 baseline,0.0005stress; not verified account fees. Same terminal liquidation fee/slippage for every held strategy.",
+  "funding": "Actual rates270 events 2026-07-13 00UTC to2026-10-10 16UTC, same-hour mark open proxy. Require continuous8h rates and hourlymark. Outside coverage no actualnet claims; separate constant +1bp/+2bp per8h sensitivity. Missing rates never zero.",
+  "windows": "Primary actual-funded 2026-07-13 00UTC–2026-10-10 17UTC exclusiveend. Secondary full withwarmup 2023-12-01 00UTC–2026-10-10 18UTC and fixed nonoverlap subperiods ending2024-10-10 18UTC,2025-10-10 18UTC,2026-10-10 18UTC. All data previously viewed; no fresh out-of-sample or prospective sample.",
+  "scenario_count": "4 candidates x4 actual execution scenarios (baseline,slip5bp,delay1h,both), plus4 windows x2 assumed-funding scenarios x4 candidates. No parameter grid, no selecting highest and declaring adopted.",
+  "metrics": "Net equity, relative matchedHOLD andCASH, hourly marked drawdown/recovery and unrecovered duration, exposure, turnover, fees/slippage/funding, trades; invalid partial runs not ranked as fullperformance.",
+  "falsification": "Insufficient sample, underperformance after costs, no consistent risk-adjusted advantage across fixed windows, fee/delayfragility, or missingfunding => no adoption. Code/testreconciliation is separate from economic viability.",
+  "preserve": "No modifications to prior SRv1/core-tactical files, production,Google,accounts,schedules,repo orremote. New isolated research artifacts only."
+}

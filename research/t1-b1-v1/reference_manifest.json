@@ -1,0 +1,19 @@
+{
+  "research_version": "T1B1_RESEARCH_V1_PORT_20261016",
+  "adopted": false,
+  "frozen_references": [
+    {
+      "path": "reference/btc-core-tactical-20261016/engine.py",
+      "sha256": "a8f0ee3cb2f0e113fd16f9094937834e9b62083e6d6e0be819b4972c150574d9"
+    },
+    {
+      "path": "reference/btc-trend-breakout-20261016/protocol.json",
+      "sha256": "eb0171d34ce1679e55a6d2eaf3f09ed1f78e2a595edde93f6b26118613f8f2dc"
+    },
+    {
+      "path": "reference/btc-trend-breakout-20261016/run.py",
+      "sha256": "8bbe235a5c4734187427c3815c5c593c29412aaaea24b639901be6079db59cba"
+    }
+  ],
+  "rule_change": false
+}

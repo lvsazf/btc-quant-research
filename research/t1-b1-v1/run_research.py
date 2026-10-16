@@ -1,0 +1,100 @@
+"""One-shot research CLI. Never starts a bot, scheduler, account client or order API."""
+import argparse,hashlib,json,datetime,concurrent.futures
+from pathlib import Path
+from bisect import bisect_right
+import pandas as pd
+import requests
+from freqtrade.enums import RunMode
+from freqtrade.resolvers import StrategyResolver
+import freqtrade
+from rules import ROOT,VERSION,MANIFEST,daily_states,simulate,load_csv,H,validate_bars
+PAIR='BTC/USDT:USDT';UTC=datetime.timezone.utc
+
+def save(path,value):path.write_text(json.dumps(value,ensure_ascii=False,indent=2,default=str)+'\n')
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def load_history(base):
+ bars=[]
+ for spec in json.loads((ROOT/'historical_inputs.json').read_text()):
+  path=base/spec['relative_path']
+  if sha(path)!=spec['sha256']:raise ValueError('Historical anchor changed: '+str(path))
+  bars+=load_csv(path)
+ return validate_bars(bars)
+def native_signals(bars,name):
+ config=dict(strategy='Frozen'+name+'Research',strategy_path=str(ROOT/'user_data/strategies'),user_data_dir=ROOT/'user_data',runmode=RunMode.BACKTEST,t1b1_research_only=True,stake_currency='USDT',stake_amount='unlimited',trading_mode='futures',dry_run=True)
+ strategy=StrategyResolver.load_strategy(config);strategy.bot_start()
+ frame=pd.DataFrame([dict(date=pd.Timestamp(b['ts'],unit='ms',tz='UTC'),open=b['open'],high=b['high'],low=b['low'],close=b['close'],volume=b.get('volume',0)) for b in bars])
+ frame=strategy.advise_indicators(frame,{'pair':PAIR});frame=strategy.advise_entry(frame,{'pair':PAIR});frame=strategy.advise_exit(frame,{'pair':PAIR})
+ states,_=daily_states(bars);s=states[name];keys=sorted(s)
+ for b,row in zip(bars,frame.itertuples()):
+  i=bisect_right(keys,b['ts']+H)-1;ready=i>=0;desired=bool(s[keys[i]]) if ready else False
+  assert bool(row.research_ready)==ready and bool(row.enter_long)==(ready and desired) and bool(row.exit_long)==(ready and not desired)
+ return frame,strategy
+
+def fetch(out,name,endpoint,params):
+ start=datetime.datetime.now(UTC);r=requests.get('https://api.bitget.com'+endpoint,params=params,timeout=30);end=datetime.datetime.now(UTC)
+ (out/(name+'.json')).write_bytes(r.content)
+ try:body=r.json()
+ except Exception:body={}
+ save(out/(name+'.metadata.json'),dict(url=r.url,http_status=r.status_code,code=body.get('code'),server_requestTime=body.get('requestTime'),requested_utc=start.isoformat(),received_utc=end.isoformat(),requested_beijing=start.astimezone(datetime.timezone(datetime.timedelta(hours=8))).isoformat(),received_beijing=end.astimezone(datetime.timezone(datetime.timedelta(hours=8))).isoformat(),sha256=hashlib.sha256(r.content).hexdigest()))
+ if r.status_code!=200 or body.get('code')!='00000':raise RuntimeError('Invalid public data: '+name)
+ return body
+
+def check_fresh(timebody,tickerbody):
+ now=int(datetime.datetime.now(UTC).timestamp()*1000)
+ stamps=[int(timebody['data']['serverTime']),int(tickerbody['data'][0]['ts'])]
+ if any(now-t>60000 or t>now+2000 for t in stamps):raise ValueError('Stale/future public time/ticker')
+ return dict(checked_utc=datetime.datetime.now(UTC).isoformat(),time_age_ms=now-stamps[0],ticker_age_ms=now-stamps[1])
+
+def main():
+ ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('mode',choices=['historical','current']);ap.add_argument('--history-root',type=Path,required=True);ap.add_argument('--output',type=Path,required=True);args=ap.parse_args()
+ from runtime_guard import verify_runtime
+ runtime=verify_runtime();print(json.dumps({'preflight':runtime},ensure_ascii=False),flush=True)
+ args.output.mkdir(parents=True,exist_ok=False);bars=load_history(args.history_root);started=datetime.datetime.now(UTC)
+ result=dict(runtime=runtime,version=VERSION,adopted=False,status='RESEARCH_ONLY_NOT_ADOPTED',mode=args.mode,started_utc=started.isoformat(),freqtrade_version=freqtrade.__version__,loaded_freqtrade=freqtrade.__file__,rule_manifest=MANIFEST,native_execution='signal interface integrated; native default order/cost ledger blocked and NOT equivalent-certified',orders_enabled=False,formal_A_signal=False)
+ try:
+  if args.mode=='current':
+   raw=args.output/'raw';raw.mkdir();t=fetch(raw,'time_initial','/api/v2/public/time',{});server=int(t['data']['serverTime']);cut=server//H*H
+   if cut-bars[-1]['ts']>1000*H:raise ValueError('More than1000 missing hours; bounded updater cannot bridge gap')
+   common=dict(symbol='BTCUSDT',productType='USDT-FUTURES')
+   queries=[('trade_h1','candles',dict(common,granularity='1H',startTime=bars[-1]['ts'],endTime=cut,limit=1000,kLineType='MARKET')),('mark_h1','candles',dict(common,granularity='1H',startTime=bars[-1]['ts'],endTime=cut,limit=1000,kLineType='MARK')),('current_funding','current-fund-rate',common),('history_funding','history-fund-rate',dict(common,pageSize=100,pageNo=1)),('contracts','contracts',common)]
+   with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
+    bodies=dict(zip([q[0] for q in queries],pool.map(lambda q:fetch(raw,q[0],'/api/v2/mix/market/'+q[1],q[2]),queries)))
+   extra=[]
+   for x in bodies['trade_h1']['data']:
+    ts=int(x[0])
+    if bars[-1]['ts']<ts<cut:extra.append(dict(ts=ts,open=float(x[1]),high=float(x[2]),low=float(x[3]),close=float(x[4]),volume=float(x[5])))
+   extra.sort(key=lambda b:b['ts']);bars=validate_bars(bars+extra)
+   if bars[-1]['ts']+H!=cut:raise ValueError('Latest closed H1 not available')
+   marktimes={int(x[0]) for x in bodies['mark_h1']['data'] if int(x[0])<cut}
+   if any(b['ts'] not in marktimes for b in extra):raise ValueError('Missing mark data')
+   fundingtimes={int(x['fundingTime']) for x in bodies['history_funding']['data']}
+   if any(b['ts'] not in fundingtimes for b in extra if b['ts']%(8*H)==0):raise ValueError('Missing funding events in appended window')
+   result.update(appended_h1=len(extra),latest_closed_h1_open_utc=datetime.datetime.fromtimestamp(bars[-1]['ts']/1000,UTC).isoformat(),closed_data_through_utc=datetime.datetime.fromtimestamp(cut/1000,UTC).isoformat(),input_h1_count=len(bars),source='Bitget public only',current_funding=bodies['current_funding']['data'])
+  checks={}
+  for name in ['T1','B1']:
+   df,strategy=native_signals(bars,name);last=df.iloc[-1]
+   checks[name]=dict(native_class=type(strategy).__name__,rows_compared=len(df),ready=bool(last.research_ready),desired_state='LONG' if bool(last.enter_long) else 'CASH',basis='closed daily state, NOT order or A signal',native_order_confirmation=strategy.confirm_trade_entry())
+  result['native_signal_checks']=checks
+  if args.mode=='historical':
+   for spec in json.loads((ROOT/'historical_cost_inputs.json').read_text()):
+    if sha(args.history_root/spec['relative_path'])!=spec['sha256']:raise ValueError('Historical funding/mark anchor changed')
+   base=args.history_root/'data';rates={r['ts']:r['fundingRate'] for r in load_csv(base/'btcusdt_usdt_futures_funding.csv')};marks={r['ts']:r for r in load_csv(base/'btcusdt_usdt_futures_mark_1h_funding_window.csv')}
+   bs=[b for b in bars if min(rates)<=b['ts']<=max(rates)]
+   if sorted(rates)!=list(range(min(rates),max(rates)+1,8*H)) or any(b['ts'] not in marks for b in bs):raise ValueError('Actual funding/mark coverage gap')
+   states,_=daily_states(bars);summaries=[]
+   for name in ['CASH','HOLD','T1','B1']:
+    r,*_=simulate(bs,name,states,rates,marks,.0002,0,args.output/'historical'/name);summaries.append(r)
+   result['historical']=summaries;result['input_start_utc']=datetime.datetime.fromtimestamp(bs[0]['ts']/1000,UTC).isoformat();result['input_end_exclusive_utc']=datetime.datetime.fromtimestamp((bs[-1]['ts']+H)/1000,UTC).isoformat()
+  else:
+   # Re-fetch at the end, after computations, so stale sampling cannot masquerade as current.
+   tb=fetch(raw,'time_final','/api/v2/public/time',{});tick=fetch(raw,'ticker_final','/api/v2/mix/market/ticker',dict(symbol='BTCUSDT',productType='USDT-FUTURES'))
+   result['freshness']=check_fresh(tb,tick)
+   if int(tb['data']['serverTime'])//H*H!=cut:raise ValueError('Hour changed during run: rerun bounded snapshot')
+   result['asof_utc']=datetime.datetime.now(UTC).isoformat();result['ticker_time_ms']=int(tick['data'][0]['ts'])
+   result['account_action']='NOT_APPLICABLE: no account read, holdings unknown, research candidate not adopted'
+  result['completed_utc']=datetime.datetime.now(UTC).isoformat()
+ except Exception as e:
+  result.update(status='BLOCKED_RESEARCH_NO_SIGNAL',error=repr(e),native_signal_checks={});save(args.output/'result.json',result);raise
+ result['integration_hashes']={str(p.relative_to(ROOT)):sha(p) for p in ROOT.rglob('*.py') if '__pycache__' not in p.parts}
+ save(args.output/'result.json',result);print(json.dumps(result,ensure_ascii=False,indent=2,default=str))
+if __name__=='__main__':main()

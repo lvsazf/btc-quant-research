@@ -1,0 +1,70 @@
+{
+  "runtime_lock_version": "T1B1_RUNTIME_LOCK_V1_20261016",
+  "research_version": "T1B1_RESEARCH_V1_PORT_20261016",
+  "adopted": false,
+  "git_source_base": "fbd5bcdaf8a66200e2ef1b67ddf8ef9af2631e80",
+  "paths": {
+    "absolute_root": "/workspace/shared/btc-quant-worktree/research/t1-b1-v1",
+    "repo_relative": "research/t1-b1-v1",
+    "python_executable": "/workspace/shared/btc-quant-worktree/.venv/bin/python",
+    "freqtrade_module": "/workspace/shared/btc-quant-worktree/freqtrade/__init__.py",
+    "history_root": "/workspace/shared/btc-quant-research-20261010"
+  },
+  "dependencies": {
+    "python": "3.12.14",
+    "packages": {
+      "freqtrade": "2026.9",
+      "pandas": "3.0.6",
+      "numpy": "2.4.6",
+      "requests": "2.34.2",
+      "ccxt": "4.5.84",
+      "TA-Lib": "0.8.0"
+    }
+  },
+  "shared_frozen_assumptions": {
+    "id": "BTC_T1_B1_FIXED_RESEARCH_V1_20261016",
+    "status": "research spike only, not adopted, no live execution",
+    "capital": 1000,
+    "instrument": "Bitget BTCUSDT USDT-FUTURES linear perpetual, not spot",
+    "candidates": [
+      "CASH: always cash, no assumed interest",
+      "HOLD: buy 90% of initial equity at first open then hold until end",
+      "T1: long when completed UTC daily close > SMA50 including that closed day, flat when below, equality preserves prior state",
+      "B1: long when completed UTC daily close > maximum high of prior20 complete UTC days excluding current; flat when close < minimum low of prior10 days excluding current; otherwise keep state"
+    ],
+    "initial_state": "T1/B1 start simulation according to causally precomputed daily state available at window start, using earlier data only as warmup. B1 state starts flat until first valid breakout. Fully complete contiguous UTC daily bars only. No price targets, trailing stops, shorts or pyramiding. Position may be held indefinitely until defined daily exit or test end.",
+    "sizing": "At each flat-to-long entry, use <=90% of current equity for notional inclusive entry fee, floor quantity0.0001BTC; all entry funds are own cash. No borrowing, external funds, leverage. Hold fixed quantity between signals. HOLD same initial90%; CASH zero exposure. Actual realized exposures differ, compare them explicitly.",
+    "risk": "No20USDT stop guarantee; original20 all-cost single-trade budget is not satisfied by these research hypotheses. Cash headroom=equity-minus-notional must remain>=0; if funding exhausts it, terminate INVALID_NO_LEVERAGE with true stop time; not exchange liquidation. Unknown historical contract/minimum order/margin rules preclude live suitability.",
+    "timing": "Compute signal after complete UTC daily close. D0 execute immediately at next hourly open at that boundary. D1 execute one hour later. Initial window entry also delayed one hour in D1 for all noncash strategies. Next-open proxies are not actual :03 bid/ask. Delayed decision cannot change retroactively. Funding occurs before timestamp trades on previously held quantity.",
+    "fees": "Taker0.0006 per side assumption; adverse spread/slippage combined0.0002 baseline,0.0005stress; not verified account fees. Same terminal liquidation fee/slippage for every held strategy.",
+    "funding": "Actual rates270 events 2026-07-13 00UTC to2026-10-10 16UTC, same-hour mark open proxy. Require continuous8h rates and hourlymark. Outside coverage no actualnet claims; separate constant +1bp/+2bp per8h sensitivity. Missing rates never zero.",
+    "windows": "Primary actual-funded 2026-07-13 00UTC\u20132026-10-10 17UTC exclusiveend. Secondary full withwarmup 2023-12-01 00UTC\u20132026-10-10 18UTC and fixed nonoverlap subperiods ending2024-10-10 18UTC,2025-10-10 18UTC,2026-10-10 18UTC. All data previously viewed; no fresh out-of-sample or prospective sample.",
+    "scenario_count": "4 candidates x4 actual execution scenarios (baseline,slip5bp,delay1h,both), plus4 windows x2 assumed-funding scenarios x4 candidates. No parameter grid, no selecting highest and declaring adopted.",
+    "metrics": "Net equity, relative matchedHOLD andCASH, hourly marked drawdown/recovery and unrecovered duration, exposure, turnover, fees/slippage/funding, trades; invalid partial runs not ranked as fullperformance.",
+    "falsification": "Insufficient sample, underperformance after costs, no consistent risk-adjusted advantage across fixed windows, fee/delayfragility, or missingfunding => no adoption. Code/testreconciliation is separate from economic viability.",
+    "preserve": "No modifications to prior SRv1/core-tactical files, production,Google,accounts,schedules,repo orremote. New isolated research artifacts only."
+  },
+  "source": {
+    "base_url": "https://api.bitget.com",
+    "symbol": "BTCUSDT",
+    "productType": "USDT-FUTURES",
+    "daily_boundary": "00:00 UTC, only 24 contiguous completed H1 bars",
+    "H1_boundary": "UTC hour, exclude current unclosed bar",
+    "freshness_seconds": 60,
+    "future_tolerance_ms": 2000
+  },
+  "files": {
+    "historical_cost_inputs.json": "79cb53bc7ca2436bfddd14f66ab0a38b384196ace91f16fc9ef6df5bae87bd6d",
+    "historical_inputs.json": "05cafbb57433bc5c5b032602440f12ccf3c878cf470e2bb549efa87269be8a7e",
+    "reference/btc-core-tactical-20261016/engine.py": "a8f0ee3cb2f0e113fd16f9094937834e9b62083e6d6e0be819b4972c150574d9",
+    "reference/btc-trend-breakout-20261016/protocol.json": "eb0171d34ce1679e55a6d2eaf3f09ed1f78e2a595edde93f6b26118613f8f2dc",
+    "reference/btc-trend-breakout-20261016/run.py": "8bbe235a5c4734187427c3815c5c593c29412aaaea24b639901be6079db59cba",
+    "reference_manifest.json": "fdb26aaa1a8e12dd6d9fbb5d656f024763e45f4c5062ff2eb2ceaff061d0f3bb",
+    "rules.py": "7c67d1d4ed4ec5fd6d8f130382104889cdea88d5753cfc9124435e4c6ddcf9bf",
+    "run_research.py": "3091c68a75502108535f00c956f44eb3d6c2a7f07325db6059cb67db1f7d2624",
+    "runtime_guard.py": "5503acdbc1ca8c4f619810c5e016ac3789b2bd612367f3b14a9084752e942540",
+    "tests/test_integration.py": "8ab2c49333cee4564a9606a5e0064b3b4d9f824cd0568f74f72a00d23a8781f7",
+    "tests/test_runtime_lock.py": "8e2cd9f0c80d4e9d4bc9ee63a3c61b0ce45ff1468444e883cf59d8f39c73f266",
+    "user_data/strategies/FrozenDailyResearch.py": "8dfeb1caacc6c18e1fdd9a710ba480e7ceb3d9abde00ddfe43edbfde74319d07"
+  }
+}
