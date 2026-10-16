@@ -23,7 +23,7 @@ Compare net equity, matched HOLD and CASH, hourly drawdown and recovery, exposur
 
 ## Commands
 
-Use the repository's existing `.venv/bin/python`. Output directories must be new to preserve earlier evidence.
+Use the repository's existing `.venv/bin/python`. The direct historical/current commands below are for separately authorized research validation only; their new output directories preserve those distinct experiments. They are NOT the hourly task entrypoint. Hourly execution must use `hourly_job.py` as documented in [HOURLY_ENTRY.md](HOURLY_ENTRY.md), with the verified original task ID, scheduled timestamp and stable storage root. Never change directories or round identity to bypass same-round deduplication.
 
 ```sh
 .venv/bin/python research/t1-b1-v1/run_research.py historical \
@@ -39,7 +39,7 @@ Use the repository's existing `.venv/bin/python`. Output directories must be new
 
 History input OHLCV hashes must match `historical_inputs.json`; historical funding/mark hashes must match `historical_cost_inputs.json`. Current mode bridges at most 1,000 hours from that anchor, checks contiguous completed H1 bars and mark/funding coverage, then fetches fresh time/ticker after calculations. It rejects data older than 60 seconds, abnormal future time, or crossing the hour boundary during calculation. HTTP/code and raw responses are preserved. It has no account/position knowledge and cannot provide an executable recommendation.
 
-## Acceptance evidence (2026-10-16)
+## Historical initial integration acceptance (2026-10-16)
 
 `/workspace/shared/btc-quant-runs/t1b1-integration-20261016/`:
 - `tests.log`: 11 tests passed, exit 0.
@@ -49,6 +49,8 @@ History input OHLCV hashes must match `historical_inputs.json`; historical fundi
 
 Known nonblocking warning: original frozen CSV loader produces ResourceWarning about unclosed reads; its source is deliberately preserved. Test harness paths refer to this cloud data installation. This package is a minimal research integration, not a standalone deployed service.
 
-## Renewed-authority current acceptance
+## Historical renewed-authority current acceptance
 
 `current-authorized-retry/result.json` exited 0 at 2026-10-16 05:12:45 UTC (13:12:45 Beijing). Eight public responses were HTTP 200/code 00000. Added 131 complete H1 bars, through 05:00 UTC exclusive; each native signal stream matched 26,435 rows. Final time age 4,976 ms and ticker age 248 ms. T1 desired LONG, B1 desired CASH, research only, not holdings/orders/adoption. This verifies current input and rule execution, not investment effectiveness.
+
+Current hourly wrapper acceptance and limitations are recorded in [HOURLY_ENTRY.md](HOURLY_ENTRY.md). Earlier test counts and direct current runs above describe their historical stages, not the current focused suite or complete external archive/notification acceptance.
