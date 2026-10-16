@@ -1,5 +1,5 @@
 {
-  "runtime_lock_version": "T1B1_RUNTIME_LOCK_V1_20261016",
+  "runtime_lock_version": "T1B1_RUNTIME_LOCK_V3_HOURLY_20261016",
   "research_version": "T1B1_RESEARCH_V1_PORT_20261016",
   "adopted": false,
   "git_source_base": "fbd5bcdaf8a66200e2ef1b67ddf8ef9af2631e80",
@@ -56,15 +56,19 @@
   "files": {
     "historical_cost_inputs.json": "79cb53bc7ca2436bfddd14f66ab0a38b384196ace91f16fc9ef6df5bae87bd6d",
     "historical_inputs.json": "05cafbb57433bc5c5b032602440f12ccf3c878cf470e2bb549efa87269be8a7e",
+    "hourly_job.py": "a757d1e43b59595133ad823ab9283cf04a449919884f2555fccda210e86078cc",
     "reference/btc-core-tactical-20261016/engine.py": "a8f0ee3cb2f0e113fd16f9094937834e9b62083e6d6e0be819b4972c150574d9",
     "reference/btc-trend-breakout-20261016/protocol.json": "eb0171d34ce1679e55a6d2eaf3f09ed1f78e2a595edde93f6b26118613f8f2dc",
     "reference/btc-trend-breakout-20261016/run.py": "8bbe235a5c4734187427c3815c5c593c29412aaaea24b639901be6079db59cba",
     "reference_manifest.json": "fdb26aaa1a8e12dd6d9fbb5d656f024763e45f4c5062ff2eb2ceaff061d0f3bb",
     "rules.py": "7c67d1d4ed4ec5fd6d8f130382104889cdea88d5753cfc9124435e4c6ddcf9bf",
-    "run_research.py": "3091c68a75502108535f00c956f44eb3d6c2a7f07325db6059cb67db1f7d2624",
+    "run_research.py": "78f40cfe3481cae3fc1977607d3b17e7ac789a359aefbdbaa028d54247652943",
     "runtime_guard.py": "5503acdbc1ca8c4f619810c5e016ac3789b2bd612367f3b14a9084752e942540",
+    "signal_report.py": "49b0f27eec83022eff2b53fe2e9b58c94865b4b64ab006b63c7ad7bd6ec79518",
+    "tests/test_hourly_job.py": "5fb8b8c189741284c62ac7f52e5e9942f414d4dd299c84594664cea3653e52b6",
     "tests/test_integration.py": "8ab2c49333cee4564a9606a5e0064b3b4d9f824cd0568f74f72a00d23a8781f7",
     "tests/test_runtime_lock.py": "8e2cd9f0c80d4e9d4bc9ee63a3c61b0ce45ff1468444e883cf59d8f39c73f266",
-    "user_data/strategies/FrozenDailyResearch.py": "8dfeb1caacc6c18e1fdd9a710ba480e7ceb3d9abde00ddfe43edbfde74319d07"
+    "tests/test_signal_report.py": "827fa178ae3346c3b7f78ff097997bc986adbe605b60416ac5e2032a9f8847df",
+    "user_data/strategies/FrozenDailyResearch.py": "8a407b0e9362a24aec09cbd45ea6b120fb46630a0256ad6bedef03005a00a63b"
   }
 }

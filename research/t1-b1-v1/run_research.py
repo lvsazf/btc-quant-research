@@ -7,6 +7,7 @@ import requests
 from freqtrade.enums import RunMode
 from freqtrade.resolvers import StrategyResolver
 import freqtrade
+from signal_report import describe_signal
 from rules import ROOT,VERSION,MANIFEST,daily_states,simulate,load_csv,H,validate_bars
 PAIR='BTC/USDT:USDT';UTC=datetime.timezone.utc
 
@@ -73,7 +74,7 @@ def main():
   checks={}
   for name in ['T1','B1']:
    df,strategy=native_signals(bars,name);last=df.iloc[-1]
-   checks[name]=dict(native_class=type(strategy).__name__,rows_compared=len(df),ready=bool(last.research_ready),desired_state='LONG' if bool(last.enter_long) else 'CASH',basis='closed daily state, NOT order or A signal',native_order_confirmation=strategy.confirm_trade_entry())
+   checks[name]=dict(native_class=type(strategy).__name__,rows_compared=len(df),ready=bool(last.research_ready),desired_state='LONG' if bool(last.enter_long) else 'CASH',basis='closed daily state, NOT order or A signal',native_order_confirmation=strategy.confirm_trade_entry(),signal_report=describe_signal(df,name))
   result['native_signal_checks']=checks
   if args.mode=='historical':
    for spec in json.loads((ROOT/'historical_cost_inputs.json').read_text()):
