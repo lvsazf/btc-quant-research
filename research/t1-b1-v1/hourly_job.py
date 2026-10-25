@@ -20,11 +20,14 @@ def previous_run(folder):
   s.update(status='INTERRUPTED',discovered_utc=now(),error='Previous attempt ended without terminal receipt; no automatic resampling');save(p,s)
  return s
 
-def decision(result):
+def decision(result, st_checkpoint=None):
  if result.get('status')!='RESEARCH_ONLY_NOT_ADOPTED':return dict(decision='ERROR_NO_DECISION',actionable=False,reasons=['Sampling/calculation incomplete'],signals={})
  if result.get('adopted') is not False:raise ValueError('This entrypoint cannot authorize adopted execution rules')
  signals={k:v['signal_report'] for k,v in result.get('native_signal_checks',{}).items()}
- return dict(decision='NO_EXECUTABLE_DECISION',actionable=False,reasons=['Frozen T1/B1 have not been adopted','Account capital/holdings and executable risk contract are not verified'],signals=signals,quantity=None,stoploss=None,target=None,entry_deadline=None)
+ if result.get('st_research'):signals['ST']=result['st_research']
+ from research_execution import describe_execution
+ research_execution={k:describe_execution(k,v,st_checkpoint if k=='ST' else None) for k,v in signals.items()}
+ return dict(decision='NO_EXECUTABLE_DECISION',actionable=False,reasons=['T1/B1 not adopted; ST approved for independent research tracking, not economically validated or account execution','Account capital/holdings and executable risk contract are not verified'],signals=signals,research_execution=research_execution,research_results_available=bool(signals),account_execution_eligibility='NOT_AUTHORIZED',quantity=None,stoploss=None,target=None,entry_deadline=None)
 
 def check_runtime_identity(before,after):
  if before['manifest_sha256']!=after['manifest_sha256']:raise ValueError('Runtime changed during observation; no decision publication')
@@ -41,8 +44,10 @@ def main():
  # Reject future invocation; late invocations retain actual times and never backfill.
  if datetime.datetime.fromisoformat(scheduled)>datetime.datetime.now(UTC)+datetime.timedelta(seconds=5):raise ValueError('Scheduled time is in the future')
  a.storage_root.mkdir(parents=True,exist_ok=True);folder=a.storage_root/key;folder.mkdir(exist_ok=True)
- with (folder/'run.lock').open('a') as lock:
-  try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+ with (a.storage_root/('task-'+hashlib.sha256(a.task_id.encode()).hexdigest()[:16]+'.lock')).open('a') as tasklock, (folder/'run.lock').open('a') as lock:
+  try:
+   fcntl.flock(tasklock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+   fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
   except BlockingIOError:print(json.dumps({'round_id':key,'status':'ALREADY_RUNNING'}));return
   old=previous_run(folder)
   if old:print(json.dumps({'round_id':key,'status':'DUPLICATE_NOT_RUN','existing':old,'folder':str(folder)}));return
@@ -54,10 +59,10 @@ def main():
   stage('PREFLIGHT')
   try:
    from runtime_guard import verify_runtime
-   runtime=verify_runtime();save(folder/'runtime.json',runtime)
+   runtime=verify_runtime();save(folder/'runtime.json',runtime);state['st_version']='ST_H1_LO_V1_CONTINUOUS_RESEARCH_20261019'
    stage('PRESERVE_INPUTS')
    blobs=a.storage_root/'inputs';blobs.mkdir(exist_ok=True);inputs={}
-   for spec in json.loads((ROOT/'historical_inputs.json').read_text()):
+   for spec in json.loads((ROOT/'historical_inputs.json').read_text())+json.loads((ROOT/'historical_cost_inputs.json').read_text()):
     data=(a.history_root/spec['relative_path']).read_bytes();digest=hashlib.sha256(data).hexdigest()
     if digest!=spec['sha256']:raise ValueError('Historical input drift')
     target=blobs/(digest+'.csv')
@@ -69,6 +74,10 @@ def main():
    save(folder/'input_index.json',{k:{'path':str(v),'sha256':hashlib.sha256(v.read_bytes()).hexdigest()} for k,v in inputs.items()})
    stage('SAMPLE_AND_CALCULATE')
    command=[sys.executable,str(ROOT/'run_research.py'),'current','--history-root',str(a.history_root),'--output',str(folder/'run')]
+   from st_runtime import load_previous
+   previous=load_previous(a.storage_root,a.task_id,scheduled,key)
+   if previous:
+    save(folder/'st_previous.json',previous);command += ['--st-previous',str(folder/'st_previous.json')]
    with (folder/'execution.log').open('w') as log:
     p=subprocess.run(command,stdout=log,stderr=subprocess.STDOUT,timeout=240)
    if p.returncode:raise RuntimeError('Research subprocess failed; exit='+str(p.returncode))
@@ -76,9 +85,16 @@ def main():
    if result.get('status')!='RESEARCH_ONLY_NOT_ADOPTED':raise ValueError('Result incomplete')
    if not result.get('freshness') or any(not x.get('ready') for x in result['native_signal_checks'].values()):raise ValueError('Freshness or rule readiness missing')
    if set(result['native_signal_checks'])!={'T1','B1'}:raise ValueError('Missing frozen strategy result')
-   d=decision(result);save(folder/'decision.json',d)
-   tick=json.loads((folder/'run/raw/ticker_final.json').read_text())['data'][0]
-   summary={'decision_and_reasons':d,'market':{'asof_utc':result['asof_utc'],'closed_through_utc':result['closed_data_through_utc'],'last':tick.get('lastPr'),'bid':tick.get('bidPr'),'ask':tick.get('askPr'),'mark':tick.get('markPrice'),'source':'Bitget public','not_a_fresh_quote_after_asof':True},'signal_basis':{'version':result['version'],'runtime':runtime,'source':'Freqtrade native strategy dataframe pipeline','signals':d['signals'],'original_observation_gaps':['Independent OI not integrated','Original multiperiod/weekly/monthly and macro observation supplement not implemented by this wrapper','Original candidate and notification lifecycle remain external']}}
+   if result.get('st_research',{}).get('status')!='RESEARCH_TRACKING_NOT_ECONOMICALLY_VALIDATED':raise ValueError('ST research result missing')
+   checkpoint=json.loads((folder/'run/st_checkpoint.json').read_text())
+   d=decision(result,checkpoint)
+   ticker=json.loads((folder/'run/raw/ticker_final.json').read_text())
+   metadata=json.loads((folder/'run/raw/ticker_final.metadata.json').read_text())
+   from signal_advice import build_advice, read_previous_decision
+   d['signal_advice']=build_advice(d['signals'],ticker,metadata,result['asof_utc'],a.task_id,read_previous_decision(previous),checkpoint)
+   save(folder/'decision.json',d)
+   tick=ticker['data'][0]
+   summary={'decision_and_reasons':d,'market':{'asof_utc':result['asof_utc'],'closed_through_utc':result['closed_data_through_utc'],'last':tick.get('lastPr'),'bid':tick.get('bidPr'),'ask':tick.get('askPr'),'mark':tick.get('markPrice'),'source':'Bitget public','not_a_fresh_quote_after_asof':True},'signal_basis':{'version':result['version'],'runtime':runtime,'source':'T1/B1: Freqtrade native strategy dataframe; ST: independent research signal and continuous cost ledger','signals':d['signals'],'original_observation_gaps':['Independent OI not integrated','Original multiperiod/weekly/monthly and macro observation supplement not implemented by this wrapper','Original candidate and notification lifecycle remain external']}}
    check_runtime_identity(runtime,result['runtime'])
    check_runtime_identity(runtime,verify_runtime())
    save(folder/'summary.json',summary);stage('PACKAGE')

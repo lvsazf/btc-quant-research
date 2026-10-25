@@ -47,7 +47,7 @@ def check_fresh(timebody,tickerbody):
  return dict(checked_utc=datetime.datetime.now(UTC).isoformat(),time_age_ms=now-stamps[0],ticker_age_ms=now-stamps[1])
 
 def main():
- ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('mode',choices=['historical','current']);ap.add_argument('--history-root',type=Path,required=True);ap.add_argument('--output',type=Path,required=True);args=ap.parse_args()
+ ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('mode',choices=['historical','current']);ap.add_argument('--history-root',type=Path,required=True);ap.add_argument('--output',type=Path,required=True);ap.add_argument('--st-previous',type=Path);args=ap.parse_args()
  from runtime_guard import verify_runtime
  runtime=verify_runtime();print(json.dumps({'preflight':runtime},ensure_ascii=False),flush=True)
  args.output.mkdir(parents=True,exist_ok=False);bars=load_history(args.history_root);started=datetime.datetime.now(UTC)
@@ -57,7 +57,11 @@ def main():
    raw=args.output/'raw';raw.mkdir();t=fetch(raw,'time_initial','/api/v2/public/time',{});server=int(t['data']['serverTime']);cut=server//H*H
    if cut-bars[-1]['ts']>1000*H:raise ValueError('More than1000 missing hours; bounded updater cannot bridge gap')
    common=dict(symbol='BTCUSDT',productType='USDT-FUTURES')
-   queries=[('trade_h1','candles',dict(common,granularity='1H',startTime=bars[-1]['ts'],endTime=cut,limit=1000,kLineType='MARKET')),('mark_h1','candles',dict(common,granularity='1H',startTime=bars[-1]['ts'],endTime=cut,limit=1000,kLineType='MARK')),('current_funding','current-fund-rate',common),('history_funding','history-fund-rate',dict(common,pageSize=100,pageNo=1)),('contracts','contracts',common)]
+   cost_spec=json.loads((ROOT/'historical_cost_inputs.json').read_text())[1]
+   if sha(args.history_root/cost_spec['relative_path'])!=cost_spec['sha256']:raise ValueError('ST mark anchor drift')
+   mark_start=min(bars[-1]['ts'],load_csv(args.history_root/cost_spec['relative_path'])[-1]['ts'])
+   if cut-mark_start>1000*H:raise ValueError('ST mark anchor exceeds bounded bridge')
+   queries=[('trade_h1','candles',dict(common,granularity='1H',startTime=bars[-1]['ts'],endTime=cut,limit=1000,kLineType='MARKET')),('mark_h1','candles',dict(common,granularity='1H',startTime=mark_start,endTime=cut,limit=1000,kLineType='mark')),('current_funding','current-fund-rate',common),('history_funding','history-fund-rate',dict(common,pageSize=100,pageNo=1)),('contracts','contracts',common)]
    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
     bodies=dict(zip([q[0] for q in queries],pool.map(lambda q:fetch(raw,q[0],'/api/v2/mix/market/'+q[1],q[2]),queries)))
    extra=[]
@@ -87,6 +91,9 @@ def main():
     r,*_=simulate(bs,name,states,rates,marks,.0002,0,args.output/'historical'/name);summaries.append(r)
    result['historical']=summaries;result['input_start_utc']=datetime.datetime.fromtimestamp(bs[0]['ts']/1000,UTC).isoformat();result['input_end_exclusive_utc']=datetime.datetime.fromtimestamp((bs[-1]['ts']+H)/1000,UTC).isoformat()
   else:
+   from st_runtime import calculate as calculate_st
+   previous=json.loads(args.st_previous.read_text()) if args.st_previous else None
+   result['st_research']=calculate_st(bars,bodies,args.history_root,args.output,previous)
    # Re-fetch at the end, after computations, so stale sampling cannot masquerade as current.
    tb=fetch(raw,'time_final','/api/v2/public/time',{});tick=fetch(raw,'ticker_final','/api/v2/mix/market/ticker',dict(symbol='BTCUSDT',productType='USDT-FUTURES'))
    result['freshness']=check_fresh(tb,tick)

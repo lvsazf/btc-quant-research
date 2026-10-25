@@ -1,0 +1,8 @@
+{
+  "round_id": "0796a1bf9a2ffcc6ce7e867c",
+  "scheduled_utc": "2026-10-19T07:03:00+00:00",
+  "archive_sha256": "c356527c26901a2f765295882371aab1e3da67e4dedb57a94837fc2e63426856",
+  "terminal_state_sha256": "6a2a86048d8a2b3c08924db2d85833ddee0557049839252a585f6fbb76e82482",
+  "basis": "Original formal scheduled trigger supplied and verified; not inferred from :03 timestamp",
+  "status": "COMPLETE"
+}

@@ -1,0 +1,43 @@
+{
+  "version": "BTC_DAILY_REVIEW_V1",
+  "fixed_start_utc": "2026-07-13T00:00:00Z",
+  "end": "Requested Beijing report date 24:00, capped to independently verified complete hourly trade, mark and funding coverage",
+  "timezone": "Asia/Shanghai",
+  "daily_indicator_boundary": "00:00 UTC",
+  "capital": 1000,
+  "strategies": [
+    "CASH",
+    "HOLD",
+    "T1",
+    "B1"
+  ],
+  "fee_per_side": 0.0006,
+  "slippage": 0.0002,
+  "delay_hours": 0,
+  "sizing": "Frozen 90% of research equity on rule entry, no borrowing/leverage; not personal account sizing",
+  "state": "Compute frozen daily states using full contiguous prehistory; cumulative ledger from fixed start, never restart daily",
+  "terminal": "Preserve frozen terminal liquidation summary separately. Day contribution uses pre-liquidation marked curve and excludes terminal trade fees/slippage",
+  "cost": "Actual funding, mark open proxy at funding; no zero filling, complete 8h event coverage required under frozen assumption",
+  "data": "All existing viewed history is diagnostic, not blind out-of-sample. Later fetched missing historical cost data is post-hoc only",
+  "optimization": "No automatic tuning/adoption. Data/run mismatch first repaired. Strategy change requires evidence, frozen isolated candidate, all same-window baseline/stress comparisons and falsification; no winner-picked window",
+  "execution": "Audited research economic ledger, NOT certified native Freqtrade order/cost ledger; no account or trade APIs",
+  "independent_research_extensions": {
+    "ST-H1-LO-v1": {
+      "protocol": "../t1-b1-v1/st_protocol.json",
+      "status": "USER_APPROVED_RESEARCH_TRACKING_NOT_ECONOMICALLY_VALIDATED",
+      "signal": "ATR10 Wilder x3, flip-only, long/cash, no stop reentry until new flip",
+      "risk": "Independent0.5% planned risk and2ATR14 stop, fee-inclusive90% maximum notional, original public-candidate costs. Do not apply main T1/B1 uniform90% sizing to ST.",
+      "continuous_ledger": "Fixed2026-07-13 UTC start; checkpoint continuation; no daily reset or terminal liquidation",
+      "daily": "Read validated ST checkpoint continuous day contribution; independently replay ST indicator flags; reconcile receipt cashflow/quantity; second independent economic order path replay not implemented",
+      "main_backtest_scope": "Main fixed four-strategy backtest remains CASH/HOLD/T1/B1. ST continuous ledger results are a separate research section, not falsely included in main four-strategy MATCH status."
+    }
+  },
+  "review_engineering": {
+    "branches": "Fixed four-strategy backtest, ST checkpoint reconstruction, per-round native and ST receipt checks have independent error boundaries; failures remain aggregate evidence issues",
+    "st_activation": "ST_ACTIVATION.json binds the first externally verified formal scheduled round; pre-activation slots are not missing ST observations",
+    "optimization_status": "Fixed replay does not perform economic diagnosis; hold frozen rules pending an explicit evidence-based review. Candidate registration is not validation or adoption.",
+    "cumulative_st_metrics": "Original checkpoint summary retained with actual checkpoint asof, not relabelled as covered-day-end metrics",
+    "independent_st_execution_path": "NOT_IMPLEMENTED; checks cover independent indicators, cashflow, quantity and event receipt consistency only",
+    "revision": "DAILY_BRANCH_REVIEW_V2_20261019"
+  }
+}
