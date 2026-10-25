@@ -18,11 +18,17 @@ class DailyTests(unittest.TestCase):
   d=day_contribution(c,t,[],1,3);self.assertEqual(d['marked_pnl'],20);self.assertEqual(d['fees'],0)
  def test_missing_day_not_zero(self):self.assertIsNone(day_contribution([],[],[],1,3)['marked_pnl'])
  def test_candidate_requires_frozen_evidence_and_hash(self):
-  from evaluate_candidate import validate_spec
+  # The arbitrary-candidate API was replaced by the frozen evidence registry.
+  # Missing evidence and mismatched artifact hashes must still be rejected.
+  from candidate_registry import validate_protocol,verify_refs
   import tempfile
   with tempfile.TemporaryDirectory() as d:
    p=Path(d)/'candidate.py';p.write_text('')
-   with self.assertRaises(ValueError):validate_spec({},p)
+   with self.assertRaisesRegex(ValueError,'protocol: missing'):
+    validate_protocol({},Path(d),'2026-10-25T00:00:00Z')
+   with self.assertRaisesRegex(ValueError,'artifact hash mismatch'):
+    verify_refs([{'path':'candidate.py','sha256':'0'*64}],Path(d))
+   verify_refs([{'path':'candidate.py','sha256':'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'}],Path(d))
  def test_timestamp_not_scheduled_proof(self):
   from daily_review import trigger_source
   self.assertEqual(trigger_source({'round_id':'x','scheduled_utc':'2026-10-16T07:03:00Z'},[]),'UNKNOWN_NOT_INFERRED_FROM_TIMESTAMP')

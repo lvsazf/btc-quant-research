@@ -1,0 +1,52 @@
+{
+  "version": "PUBLIC_H1_FIXED_TWO_V1",
+  "frozen_utc": "2026-10-19T05:26:54.482600+00:00",
+  "execution_status": "PRE_RESULT_PENDING_PARENT_CODE_REVIEW",
+  "sources": [
+    "https://www.tradingview.com/support/solutions/43000634738-supertrend/",
+    "https://www.tradingview.com/support/solutions/43000645068-supertrend-strategy/",
+    "https://tradingmarkets.com/recent/the_improved_r2_strategy_84_correct_with_just_6_rules_-674361"
+  ],
+  "candidates": {
+    "ST-H1-LO-v1": "ATR10 Wilder seeded by mean first 10 true ranges, multiplier3 preregistered not claimed official default; upper/lower recursive bands; initial down; strict close>upper flips long, strict close<lower flips flat; flip-only entries/exits; no short",
+    "R2-H1-LO-v1": "BTC H1 adaptation of SPX daily original: latest close>SMA200, RSI2 at i-2<65, RSI2[i-2]>RSI2[i-1]>RSI2[i]; exit RSI2>75; Wilder RSI seeded mean first2 gains/losses; flat series RSI=50; SMA gate at third bar only; original same close replaced next open"
+  },
+  "adapter": "daily_long=True disables legacy SMA50 gate only; never reported as real daily trend; no other legacy signal survives",
+  "risk": "Unmodified audited engine A risk layer:1000 USDT,0.5% initial planned risk,2ATR14 fixed stop,90% entry nominal plus fee cap,0.0001 BTC rounding,5 USDT minimum order,0.1 price tick,long-only no borrowing,single position,stop gap before signal actions,no same-open reentry after exit; protective stops never delayed; funding charged before open actions and at terminal if due",
+  "scenarios": {
+    "base": [
+      0.0002,
+      0
+    ],
+    "slip5bp": [
+      0.0005,
+      0
+    ],
+    "delay1h": [
+      0.0002,
+      1
+    ],
+    "both": [
+      0.0005,
+      1
+    ]
+  },
+  "fee_each_side": 0.0006,
+  "windows": "actual 2026-07-13T00Z to2026-10-18T08Z; full2023-12-01 to cutoff;7 full consecutive3month folds2024-12-01 to2026-09-01 plus partial tail separate; all previously seen; per-window independent1000 and flat state, full prehistory indicator warmup; no training/tuning",
+  "funding": "actual window signed actual rates+verified mark; full/folds separate1bp/2bp adverse per8h assumptions, not actual performance",
+  "cutoff": "2026-10-18T08:00:00Z terminal mark open only, no terminal HLC signal",
+  "gates": "actual base/high-slip positive; complete fold sum base/high-slip positive under both funding assumptions; strictly majority positive base folds under both; full base return>=DAILY_RISK and drawdown<= with at least one strict improvement under both;>=30 natural exits in7fold1bpbase; no best-return forced selection",
+  "baseline": "reuse exact source/input verified original DAILY_RISK,T1,B1,HOLD,CASH; same monetary engine, not same signal filter; invalid borrowing baseline remains invalid not0",
+  "limitations": "independent stdlib research engine, not official native Freqtrade order-cost certification; all seen history,no real trades,no adoption,no hour job modifications",
+  "code_hashes": {
+    "public_candidates.py": "9eee745df9b55984f9b2ef2e03a8cc7618d84f421d9ef57435708b00ca70e67d",
+    "inputs.py": "70f3801071040441c4e8de3bdd96ad1830c0efdcb5765cc64171f75e083e380b",
+    "run_public.py": "47e00c584e1d6687e2ce0193c7ea8cfded22225c6328aa785b922edb4efc1653",
+    "reference/original/engine.py": "0cf4002aee139c8fb8dae0eb76e695eb77dad571a765bb28128cdf8cb7df873c",
+    "reference/original/indicators.py": "2ef16c80831597c34695b3f7d21f89f191314cb59c3b495a8e4a662db8bc86ef",
+    "reference/original/load_inputs.py": "b0dbc8f419ef9890fd0e450e05899a10f3e074e06bd239cd09c505ad6980387f",
+    "reference/original/run_research.py": "8269adccfc410c5f5e7eb23aef1e9dcd5bd7b67c577e7b63e8fbb1b2de8b1926",
+    "reference/original/outputs/run-02/results.json": "b5141c4718358d6f42d013ef389de13c16812e5b7300b8470c74bd963cc97659",
+    "reference/original/outputs/run-02/input_manifest.json": "53bc2b6872fe75d0670733aa9f930e111b3390c7259b79fa87e29dc3dfbe8cd9"
+  }
+}

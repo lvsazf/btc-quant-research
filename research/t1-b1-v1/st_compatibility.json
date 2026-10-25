@@ -1,0 +1,15 @@
+{
+  "id": "ST_HOURLY_RESEARCH_EXTENSION_20261019",
+  "authorized_by": "Sentinel_e1f6c3f614f08191b1a16f4057fb41f9",
+  "new_run_research_sha256": "46867456925b03e85c8290bcf09da32ed74956a8470ef7f7a073561011ece15b",
+  "allowed_old_pairs": [
+    {
+      "source_sha256": "d8ba1d1222e454e29988c00b371c9a67f9b7e120cea14706e1bf472090497b78",
+      "manifest_sha256": "0b42704c1a90f3719bdbee7a62ddc48fbf1017397346b75bc2ba22fe7a841d50"
+    },
+    {
+      "source_sha256": "78f40cfe3481cae3fc1977607d3b17e7ac789a359aefbdbaa028d54247652943",
+      "manifest_sha256": "07e516424051a04c1c15e3bb71a9b2c816ac2f8c091e19f551b3c738fd367c53"
+    }
+  ]
+}

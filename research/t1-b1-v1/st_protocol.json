@@ -1,0 +1,16 @@
+{
+  "version": "ST_H1_LO_V1_CONTINUOUS_RESEARCH_20261019",
+  "strategy": "ST-H1-LO-v1",
+  "authorized_by": "Sentinel_e1f6c3f614f08191b1a16f4057fb41f9",
+  "status": "APPROVED_HOURLY_RESEARCH_TRACKING_NOT_ECONOMICALLY_VALIDATED",
+  "signal": "Frozen Supertrend ATR10 Wilder, multiplier3, flip-only long/cash. No stop reentry until a later down-to-up flip.",
+  "capital": 1000,
+  "risk": "Frozen original risk layer:0.5% planned risk,2ATR14 fixed stop,90% fee-inclusive nominal cap,0.0001BTC step,5USDT minimum,0.1price tick,fee6bp/side and adverse slip2bp/side,actual funding before open actions; not account budget/fees.",
+  "continuity": "Fixed start2026-07-13 UTC. First round reconstructs research ledger and emits INITIALIZED, not a real-time entry. Later rounds process new closed H1 plus current open-only boundary, exactly once. No terminal liquidation, no daily resetting.",
+  "source_protocol_sha256": "389a5bdd3c72840fc6f45f1b85228420d48b6a7b667ef18bac8173fd9762ec92",
+  "source_engine_sha256": "0cf4002aee139c8fb8dae0eb76e695eb77dad571a765bb28128cdf8cb7df873c",
+  "not_adopted_for_account_execution": true,
+  "orders_enabled": false,
+  "hourly_stop_execution": "Historical closed-bar reconstruction; not a hosted realtime stop",
+  "evidence": "Full ledger checkpoint, immutable input prefix hashes, preceding COMPLETE archive/checkpoint references, source snapshot and raw public responses"
+}
