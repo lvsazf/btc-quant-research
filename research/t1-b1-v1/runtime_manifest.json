@@ -1,14 +1,14 @@
 {
-  "runtime_lock_version": "T1B1_ST_RESEARCH_RUNTIME_V1_20261019",
+  "runtime_lock_version": "T1B1_ST_RESEARCH_RUNTIME_V2_PATHS_20261026",
   "research_version": "T1B1_RESEARCH_V1_PORT_20261016",
   "adopted": false,
   "git_source_base": "fbd5bcdaf8a66200e2ef1b67ddf8ef9af2631e80",
   "paths": {
-    "absolute_root": "/workspace/shared/btc-quant-worktree/research/t1-b1-v1",
+    "absolute_root": "/workspace/scratch/53a27f12d2db/btc-runtime/btc-quant-worktree/research/t1-b1-v1",
     "repo_relative": "research/t1-b1-v1",
-    "python_executable": "/workspace/shared/btc-quant-worktree/.venv/bin/python",
-    "freqtrade_module": "/workspace/shared/btc-quant-worktree/freqtrade/__init__.py",
-    "history_root": "/workspace/shared/btc-quant-research-20261010"
+    "python_executable": "/workspace/scratch/53a27f12d2db/btc-runtime/btc-quant-worktree/.venv/bin/python",
+    "freqtrade_module": "/workspace/scratch/53a27f12d2db/btc-runtime/btc-quant-worktree/freqtrade/__init__.py",
+    "history_root": "/workspace/scratch/53a27f12d2db/btc-runtime/btc-quant-research-20261010"
   },
   "dependencies": {
     "python": "3.12.14",
@@ -62,18 +62,18 @@
     "reference/btc-trend-breakout-20261016/run.py": "8bbe235a5c4734187427c3815c5c593c29412aaaea24b639901be6079db59cba",
     "reference_manifest.json": "fdb26aaa1a8e12dd6d9fbb5d656f024763e45f4c5062ff2eb2ceaff061d0f3bb",
     "rules.py": "7c67d1d4ed4ec5fd6d8f130382104889cdea88d5753cfc9124435e4c6ddcf9bf",
-    "run_research.py": "46867456925b03e85c8290bcf09da32ed74956a8470ef7f7a073561011ece15b",
+    "run_research.py": "00c54e840378b00ac315e36bec73dcdf63a2576f7559ac601142f20126099ff0",
     "runtime_guard.py": "5503acdbc1ca8c4f619810c5e016ac3789b2bd612367f3b14a9084752e942540",
     "signal_report.py": "49b0f27eec83022eff2b53fe2e9b58c94865b4b64ab006b63c7ad7bd6ec79518",
     "tests/test_hourly_job.py": "5fb8b8c189741284c62ac7f52e5e9942f414d4dd299c84594664cea3653e52b6",
-    "tests/test_integration.py": "8ab2c49333cee4564a9606a5e0064b3b4d9f824cd0568f74f72a00d23a8781f7",
+    "tests/test_integration.py": "e8e3dfa60a8602f15461401010ff07c9bcd6b60480aacfb4c6aa83b3c01fb806",
     "tests/test_runtime_lock.py": "8e2cd9f0c80d4e9d4bc9ee63a3c61b0ce45ff1468444e883cf59d8f39c73f266",
     "tests/test_signal_report.py": "827fa178ae3346c3b7f78ff097997bc986adbe605b60416ac5e2032a9f8847df",
     "user_data/strategies/FrozenDailyResearch.py": "8a407b0e9362a24aec09cbd45ea6b120fb46630a0256ad6bedef03005a00a63b",
     "tests/test_mark_source.py": "f0513fe7dfd009a680c5193d751fe17b5900166f6fca9ae2ac7475dce7626c28",
-    "../daily-review-v1/daily_review.py": "e9d91b776b9521305dbaed8aa5911d3c6c781e7991affcf644456049253d2f20",
+    "../daily-review-v1/daily_review.py": "20df1bcc813f47c360faf5e080e17d4e7a4cd91643c3a9fcd35989aff0a5d034",
     "../daily-review-v1/tests/test_mark_source.py": "9a6c4516471d7c7be1fcac95da0b290b877738172bdf1e7ae663972e52385146",
-    "../daily-review-v1/tests/test_replay_compatibility.py": "8859c630c790c4ed387d2246f4ad4b949755e2e875828ad123ea166a2f2ca861",
+    "../daily-review-v1/tests/test_replay_compatibility.py": "56132fd0681c073a6c650727150e2c92133cfcd3d25ab9084380e0fbb4b55332",
     "../daily-review-v1/tests/fixtures/runtime_v3_before_mark_fix.json": "07e516424051a04c1c15e3bb71a9b2c816ac2f8c091e19f551b3c738fd367c53",
     "st_engine.py": "e7c47d24134c2e63c6d7c76c1dc6fe3cf2461c6581d5c45a330b55c1068bcf96",
     "st_signals.py": "594f0ed8ad5e64be5e941b4c3de36c7c3d913d6e6f6fb8635d0a1b521c4e0399",
@@ -87,7 +87,7 @@
     "reference/st-approved/run_research_v3.txt": "d8ba1d1222e454e29988c00b371c9a67f9b7e120cea14706e1bf472090497b78",
     "reference/st-approved/indicators.py": "2ef16c80831597c34695b3f7d21f89f191314cb59c3b495a8e4a662db8bc86ef",
     "reference/st-approved/runtime_v3_before_st.json": "0b42704c1a90f3719bdbee7a62ddc48fbf1017397346b75bc2ba22fe7a841d50",
-    "tests/test_st_continuous.py": "1a79d4015cad76aa6987bc826115c505eb53c6cf113f6c32dacaff283699bd66",
+    "tests/test_st_continuous.py": "c6d6440a0925585001e82f0eefb614c6002686a85bdbd3e10386a33eabcf68b0",
     "tests/test_st_st_contract.py": "d8f166b334237db0fa39ce176295350f1794e81d906bf689cd16c62540d8de69",
     "../daily-review-v1/PROTOCOL.json": "2a5ded1d9525284b050c44f02932d85f19d0aa70d7c9df2931b4e42539260bce",
     "research_execution.py": "325d4249e48a899053cef8ce7d2361dcb6e2525c9b3424924cc281c42662ebe6",
@@ -101,7 +101,12 @@
     "../daily-review-v1/tests/test_candidate_registry.py": "ca0e7f41638cebe1c497bf19ea8375dd3e00dad6e3471be89e6cf9db8c01fe37",
     "signal_advice.py": "20b4c275aef8693f39daa2f10faf63744167d050b7f9afd26511e368a0d0f6e2",
     "tests/test_signal_advice.py": "88ad1aa3ccdacf9f9d83f9300ccfa191f9f156d3c2ba4a9c9a448981ed71d86a",
-    "tests/test_advice_presentation.py": "1fb3e364372666a5f0d9650eddbf1e216db56473784ec1b30f977f734c115901"
+    "tests/test_advice_presentation.py": "1fb3e364372666a5f0d9650eddbf1e216db56473784ec1b30f977f734c115901",
+    "tests/test_public_pagination.py": "9b611198a3c83d2d1b2b137540a11b9459667c70317056378ee99019d299cb63",
+    "pagination_compatibility.json": "d83e8eb42c1a66a45f00fdcc591aa432db16ed52cfabe37895e2738502587133",
+    "reference/pagination-approved/run_research_before.py.txt": "46867456925b03e85c8290bcf09da32ed74956a8470ef7f7a073561011ece15b",
+    "../daily-review-v1/tests/test_pagination.py": "9109e8ad7999c915f4c98c50cd39e427652fbc6915eba993ce1d95d1423eb0d8",
+    "../daily-review-v1/tests/fixtures/runtime_before_pagination.json": "7de5d25f18a329e79feacf446f54c1e8abf4fdaa87556c1d43dc341d68d95893"
   },
   "technical_revision": {
     "id": "MARK_SOURCE_CASE_FIX_20261018",
@@ -142,6 +147,26 @@
       "previous_manifest_sha256": "a70821184738051306d01718e5ce64e4a72e18f4d968d31856fafb87c2d95c01",
       "scope": "Add non-mutating display projection only; separate strategy target from new advice; prioritize exceptional coverage, historical and repeated events. All prior fields, economics, signals, market sampling and ledgers unchanged.",
       "applied_utc": "2026-10-19T19:22:41.138460+00:00"
+    },
+    "runtime_path_migration": {
+      "id": "CLOUD_WRITABLE_RUNTIME_PATHS_20261026",
+      "authorized_by": "Sentinel_f62fd69250cc8191bec7a74b4b02590c",
+      "authorization_utc": "2026-10-26T03:44:46Z",
+      "previous_manifest_sha256": "151c15161e1f02e04b8dfa7195f173dbe0b626a31f57a2257382b3e14390e915",
+      "verified_source_commit": "620bb04c5a299f8361f3b4ab8ec178d4d97cff11",
+      "scope": "Paths-only technical restoration in authorized writable cloud workspace; four absolute runtime paths and two fixture path expressions changed. All production, signal, economic, source-guard, historical-input hash and checkpoint logic bytes unchanged. Old source, manifest and archived evidence preserved. No ledger initialization, failed-round replay, market fetch, schedule identity, economics or notification change.",
+      "changed_test_paths": [
+        "tests/test_integration.py",
+        "tests/test_st_continuous.py"
+      ],
+      "applied_utc": "2026-10-26T03:48:11.031794+00:00"
+    },
+    "public_pagination_repair": {
+      "id": "PUBLIC_PAGINATION_REPAIR_20261115",
+      "authorized_by": "Sentinel_c6b47a8d75a08191bb8ddc7b1ec12e41",
+      "previous_manifest_sha256": "7de5d25f18a329e79feacf446f54c1e8abf4fdaa87556c1d43dc341d68d95893",
+      "scope": "Public funding pagination and H1 pagination only; raw responses retained, derived window separately indexed; frozen economics unchanged; current H1 endpoint retains explicit83-day limit; not perpetual incremental maintenance",
+      "applied_utc": "2026-11-15T06:17:58.745007+00:00"
     }
   },
   "st_research": {

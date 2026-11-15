@@ -40,7 +40,7 @@ def validate_mark_source(meta):
  if not valid or meta.get('http_status')!=200 or meta.get('code')!='00000':
   raise ValueError('Unverified historical mark price source; uppercase MARK/market prices cannot enter cost ledger. Preserve original evidence and use an explicit audited correction.')
 
-def replay_compatibility(p,required):
+def replay_compatibility(p,required,_run_override=None):
  """One audited fetch-only transition, never a generic version bypass."""
  old_hash='78f40cfe3481cae3fc1977607d3b17e7ac789a359aefbdbaa028d54247652943'
  new_hash='d8ba1d1222e454e29988c00b371c9a67f9b7e120cea14706e1bf472090497b78'
@@ -49,7 +49,27 @@ def replay_compatibility(p,required):
  # Explicit ST extension changes data fetch / wrapper only for T1/B1.
  # Current and archived whole-file hashes plus exact native function equality are required.
  transition=json.loads((BASE/'st_compatibility.json').read_text())
- current_run=(BASE/'run_research.py').read_bytes()
+ current_run=_run_override if _run_override is not None else (BASE/'run_research.py').read_bytes()
+ pagination=BASE/'pagination_compatibility.json'
+ if _run_override is None and pagination.is_file():
+  try:
+   tr=json.loads(pagination.read_text())
+   if sha(current_run)==tr['new_run_research_sha256']:
+    archived=p['files']['source/run_research.py']['content'].encode()
+    if archived!=current_run:
+     old=(BASE/tr['previous_source_path']).read_bytes()
+     mr=p['files']['source/runtime_manifest.json']['content'].encode()
+     pair={'source_sha256':sha(archived),'manifest_sha256':sha(mr)}
+     if pair not in tr['allowed_old_pairs']:raise ValueError('Unknown pagination source/manifest pair')
+     if sha(old)!=tr['previous_run_research_sha256']:raise ValueError('Pagination reference mismatch')
+     def native_part(raw):return raw[raw.index(b'def native_signals('):raw.index(b'def fetch(')]
+     if native_part(old)!=native_part(current_run):raise ValueError('Pagination native signal drift')
+     prior=replay_compatibility(p,required,old)
+     if prior['status']=='UNSUPPORTED':return prior
+     frozen=json.loads(mr)
+     if sha(mr)!=p['files']['source/runtime_manifest.json']['sha256'] or any(frozen['files'].get(n)!=p['files']['source/'+n]['sha256'] for n in required):raise ValueError('Pagination archived manifest disagreement')
+     return dict(status='KNOWN_PAGINATION_FETCH_ONLY',changed_files=['run_research.py'],proof=dict(old_source_sha256=sha(archived),new_source_sha256=sha(current_run),archived_manifest_sha256=sha(mr),prior_compatibility=prior,equivalence='Exact native signal function and economic references; archived data only'))
+  except (KeyError,ValueError,TypeError,OSError) as e:return dict(status='UNSUPPORTED',reason=str(e))
  if sha(current_run)==transition['new_run_research_sha256']:
   try:
    run=p['files']['source/run_research.py'];old=run['content'].encode()
@@ -69,7 +89,7 @@ def replay_compatibility(p,required):
   except (KeyError,ValueError,TypeError,StopIteration) as e:return dict(status='UNSUPPORTED',reason=str(e))
  try:
   for name in required:
-   entry=p['files']['source/'+name];archived=entry['content'].encode();current=(BASE/name).read_bytes()
+   entry=p['files']['source/'+name];archived=entry['content'].encode();current=current_run if name=='run_research.py' else (BASE/name).read_bytes()
    if sha(archived)!=entry['sha256']:raise ValueError('Embedded source digest mismatch')
    if archived==current:continue
    if name!='run_research.py' or sha(archived)!=old_hash or sha(current)!=new_hash:raise ValueError('Unknown source transition')
@@ -133,6 +153,41 @@ def package(path):
   if sha(b)!=s['sha256'] or len(b)!=s['bytes']:raise ValueError('Archive hash mismatch '+name)
  return p,sha(raw)
 def body(p,name):return json.loads(p['files'][name]['content'])
+def public_data(p,name):
+ """Verify derived pagination against each immutable response and source metadata."""
+ index='run/public_window.json'
+ if index not in p['files']:return body(p,'run/raw/'+name+'.json')['data']
+ from urllib.parse import urlparse,parse_qs
+ w=body(p,index)
+ if w.get('kind')!='DERIVED_PAGINATED_PUBLIC_WINDOW_V1':raise ValueError('Unknown paginated public window')
+ for file,digest in w['raw_pages'].items():
+  if '/' in file or file in ('.','..'):raise ValueError('Invalid raw page path')
+  entry=p['files']['run/raw/'+file]
+  if sha(entry['content'].encode())!=digest or entry['sha256']!=digest:raise ValueError('Raw pagination digest mismatch')
+ names=[name+'.json']+sorted([n for n in w['raw_pages'] if n.startswith(name+'_page_') and not n.endswith('.metadata.json')],key=lambda n:int(n.split('_page_')[1].split('.')[0]))
+ rows={}
+ for file in names:
+  meta_file=file[:-5]+'.metadata.json'
+  if file not in w['raw_pages'] or meta_file not in w['raw_pages']:raise ValueError('Missing raw pagination evidence')
+  b=body(p,'run/raw/'+file);m=body(p,'run/raw/'+meta_file)
+  if m.get('sha256')!=w['raw_pages'][file] or m.get('http_status')!=200 or m.get('code')!='00000' or b.get('code')!='00000':raise ValueError('Invalid raw pagination response')
+  u=urlparse(m['url']);q=parse_qs(u.query)
+  if u.scheme!='https' or u.netloc!='api.bitget.com' or q.get('symbol')!=['BTCUSDT'] or q.get('productType')!=['USDT-FUTURES']:raise ValueError('Invalid pagination market source')
+  if name=='history_funding':
+   if u.path!='/api/v2/mix/market/history-fund-rate':raise ValueError('Invalid funding pagination source')
+  else:
+   if u.path!='/api/v2/mix/market/candles' or q.get('granularity')!=['1H']:raise ValueError('Invalid candle pagination source')
+   if name=='mark_h1':validate_mark_source(m)
+   elif q.get('kLineType')!=['MARKET']:raise ValueError('Invalid trade pagination source')
+  for r in b['data']:
+   t=int(r['fundingTime'] if name=='history_funding' else r[0])
+   if name!='history_funding' and not int(q['startTime'][0])<t<=int(q['endTime'][0]):continue
+   if t in rows and rows[t]!=r:raise ValueError('Conflicting pagination overlap')
+   rows[t]=r
+ data=[rows[t] for t in sorted(rows)]
+ if data!=w['bodies'][name]['data']:raise ValueError('Derived pagination mismatch')
+ return data
+
 def archived_bars(p):
  bars=[]
  for spec in body(p,'source/historical_inputs.json'):
@@ -140,7 +195,7 @@ def archived_bars(p):
   if s['sha256']!=spec['sha256']:raise ValueError('Historical anchor mismatch')
   bars+=csv_rows(s['content'])
  cut=int(datetime.datetime.fromisoformat(body(p,'run/result.json')['closed_data_through_utc']).timestamp()*1000)
- extra=[b for b in candle_rows(body(p,'run/raw/trade_h1.json')['data']) if bars[-1]['ts']<b['ts']<cut]
+ extra=[b for b in candle_rows(public_data(p,'trade_h1')) if bars[-1]['ts']<b['ts']<cut]
  bars=validate_bars(bars+sorted(extra,key=lambda b:b['ts']))
  if bars[-1]['ts']+H!=cut:raise ValueError('Archive closed boundary mismatch')
  return bars
@@ -206,12 +261,12 @@ def fixed_backtest(a,latest,start,end,report):
   costs[path.name]=csv_rows(b.decode())
  rates={r['ts']:r['fundingRate'] for r in costs['btcusdt_usdt_futures_funding.csv']}
  marks={r['ts']:r for r in costs['btcusdt_usdt_futures_mark_1h_funding_window.csv']}
- for x in body(latest,'run/raw/history_funding.json')['data']:
+ for x in public_data(latest,'history_funding'):
   t=int(x['fundingTime']);v=float(x['fundingRate'])
   if t in rates and rates[t]!=v:raise ValueError('Funding overlap conflict')
   rates[t]=v
  validate_mark_source(body(latest,'run/raw/mark_h1.metadata.json'))
- for b in candle_rows(body(latest,'run/raw/mark_h1.json')['data']):
+ for b in candle_rows(public_data(latest,'mark_h1')):
   b.pop('volume',None)
   if b['ts'] in marks and marks[b['ts']]!=b:raise ValueError('Mark overlap conflict')
   marks[b['ts']]=b

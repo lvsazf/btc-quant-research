@@ -46,6 +46,48 @@ def check_fresh(timebody,tickerbody):
  if any(now-t>60000 or t>now+2000 for t in stamps):raise ValueError('Stale/future public time/ticker')
  return dict(checked_utc=datetime.datetime.now(UTC).isoformat(),time_age_ms=now-stamps[0],ticker_age_ms=now-stamps[1])
 
+def complete_funding(out,common,first,start,cut):
+ """Page backwards with strict coverage; raw pages stay immutable in evidence."""
+ rows={};body=first;page=1;oldest=None
+ required=set(range(((start+8*H-1)//(8*H))*(8*H),cut+1,8*H))
+ while True:
+  data=body.get('data')
+  if not isinstance(data,list) or not data:raise ValueError('Missing funding events in appended window')
+  times=[]
+  for row in data:
+   t=int(row['fundingTime']);v=float(row['fundingRate'])
+   if t%(8*H) or t>cut or not __import__('math').isfinite(v):raise ValueError('Invalid funding page timestamp/rate')
+   if row.get('symbol','BTCUSDT')!='BTCUSDT':raise ValueError('Wrong funding symbol')
+   if t in rows and float(rows[t]['fundingRate'])!=v:raise ValueError('Conflicting funding page overlap')
+   rows[t]=row;times.append(t)
+  if required.issubset(rows):break
+  newold=min(times)
+  if oldest is not None and newold>=oldest:raise ValueError('Funding pagination made no progress')
+  if newold<=start:raise ValueError('Missing funding events in appended window')
+  oldest=newold;page+=1
+  if page>100:raise ValueError('Funding pagination exceeded 100 pages')
+  body=fetch(out,'history_funding_page_'+str(page),'/api/v2/mix/market/history-fund-rate',dict(common,pageSize=100,pageNo=page))
+ return dict(first,data=[rows[t] for t in sorted(rows)])
+
+def fetch_candle_window(out,name,common,start,cut,kind):
+ """Partition the documented <=83-day H1 window, at most1000 records/request."""
+ if cut-start>83*24*H:raise ValueError('H1 candles exceed documented 83 days retention; verified incremental restoration required')
+ if start%H or cut%H or start>=cut:raise ValueError('Invalid H1 window')
+ rows={};cursor=start+H;page=1;first=None
+ while cursor<=cut:
+  end=min(cut,cursor+999*H)
+  body=fetch(out,name if page==1 else name+'_page_'+str(page),'/api/v2/mix/market/candles',dict(common,granularity='1H',startTime=cursor-H,endTime=end,limit=1000,kLineType=kind))
+  if first is None:first=body
+  for row in body['data']:
+   t=int(row[0])
+   if t%H or t>cut:raise ValueError('Invalid/future H1 page timestamp')
+   if cursor<=t<=end:
+    if t in rows and row!=rows[t]:raise ValueError('Conflicting candle page overlap')
+    rows[t]=row
+  if any(t not in rows for t in range(cursor,end+1,H)):raise ValueError('Missing H1 candle in paged window')
+  cursor=end+H;page+=1
+ return dict(first,data=[rows[t] for t in sorted(rows)])
+
 def main():
  ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('mode',choices=['historical','current']);ap.add_argument('--history-root',type=Path,required=True);ap.add_argument('--output',type=Path,required=True);ap.add_argument('--st-previous',type=Path);args=ap.parse_args()
  from runtime_guard import verify_runtime
@@ -55,15 +97,19 @@ def main():
  try:
   if args.mode=='current':
    raw=args.output/'raw';raw.mkdir();t=fetch(raw,'time_initial','/api/v2/public/time',{});server=int(t['data']['serverTime']);cut=server//H*H
-   if cut-bars[-1]['ts']>1000*H:raise ValueError('More than1000 missing hours; bounded updater cannot bridge gap')
    common=dict(symbol='BTCUSDT',productType='USDT-FUTURES')
    cost_spec=json.loads((ROOT/'historical_cost_inputs.json').read_text())[1]
    if sha(args.history_root/cost_spec['relative_path'])!=cost_spec['sha256']:raise ValueError('ST mark anchor drift')
    mark_start=min(bars[-1]['ts'],load_csv(args.history_root/cost_spec['relative_path'])[-1]['ts'])
-   if cut-mark_start>1000*H:raise ValueError('ST mark anchor exceeds bounded bridge')
-   queries=[('trade_h1','candles',dict(common,granularity='1H',startTime=bars[-1]['ts'],endTime=cut,limit=1000,kLineType='MARKET')),('mark_h1','candles',dict(common,granularity='1H',startTime=mark_start,endTime=cut,limit=1000,kLineType='mark')),('current_funding','current-fund-rate',common),('history_funding','history-fund-rate',dict(common,pageSize=100,pageNo=1)),('contracts','contracts',common)]
-   with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
+   queries=[('current_funding','current-fund-rate',common),('history_funding','history-fund-rate',dict(common,pageSize=100,pageNo=1)),('contracts','contracts',common)]
+   with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
     bodies=dict(zip([q[0] for q in queries],pool.map(lambda q:fetch(raw,q[0],'/api/v2/mix/market/'+q[1],q[2]),queries)))
+   # Retain documented mark spelling; do not substitute market prices for mark.
+   kinds=dict(kLineType='mark')
+   bodies['trade_h1']=fetch_candle_window(raw,'trade_h1',common,bars[-1]['ts'],cut,'MARKET')
+   bodies['mark_h1']=fetch_candle_window(raw,'mark_h1',common,mark_start,cut,kinds['kLineType'])
+   bodies['history_funding']=complete_funding(raw,common,bodies['history_funding'],bars[-1]['ts']+H,cut)
+   save(args.output/'public_window.json',dict(kind='DERIVED_PAGINATED_PUBLIC_WINDOW_V1',bodies=bodies,raw_pages={p.name:sha(p) for p in sorted(raw.glob('*.json'))}))
    extra=[]
    for x in bodies['trade_h1']['data']:
     ts=int(x[0])

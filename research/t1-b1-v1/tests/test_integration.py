@@ -34,7 +34,7 @@ class Integration(unittest.TestCase):
   now=int(datetime.datetime.now(datetime.timezone.utc).timestamp()*1000)
   with self.assertRaises(ValueError):check_fresh({'data':{'serverTime':now+5000}},{'data':[{'ts':now}]})
  def test_original_actual_results(self):
-  base=Path('/workspace/shared/btc-quant-research-20261010');bs=load_history(base);states,_=daily_states(bs)
+  base=Path(json.loads((ROOT/'runtime_manifest.json').read_text())['paths']['history_root']);bs=load_history(base);states,_=daily_states(bs)
   from rules import load_csv
   rates={r['ts']:r['fundingRate'] for r in load_csv(base/'data/btcusdt_usdt_futures_funding.csv')};marks={r['ts']:r for r in load_csv(base/'data/btcusdt_usdt_futures_mark_1h_funding_window.csv')}
   cut=[b for b in bs if min(rates)<=b['ts']<=max(rates)]

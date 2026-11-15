@@ -3,7 +3,7 @@ from pathlib import Path
 P=Path(__file__).resolve().parents[1];sys.path.insert(0,str(P))
 from st_engine import simulate
 from st_indicators import H
-sys.path.insert(0,'/workspace/shared/btc-quant-worktree/research/t1-b1-v1/reference/st-approved')
+sys.path.insert(0,str(P/'reference/st-approved'))
 import engine as old
 class Continuous(unittest.TestCase):
  def dataset(self):
