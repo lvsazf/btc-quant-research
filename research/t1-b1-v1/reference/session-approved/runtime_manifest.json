@@ -1,0 +1,193 @@
+{
+  "runtime_lock_version": "T1B1_ST_RESEARCH_RUNTIME_V2_PATHS_20261026",
+  "research_version": "T1B1_RESEARCH_V1_PORT_20261016",
+  "adopted": false,
+  "git_source_base": "fbd5bcdaf8a66200e2ef1b67ddf8ef9af2631e80",
+  "paths": {
+    "absolute_root": "/workspace/scratch/53a27f12d2db/btc-runtime/btc-quant-worktree/research/t1-b1-v1",
+    "repo_relative": "research/t1-b1-v1",
+    "python_executable": "/workspace/scratch/53a27f12d2db/btc-runtime/btc-quant-worktree/.venv/bin/python",
+    "freqtrade_module": "/workspace/scratch/53a27f12d2db/btc-runtime/btc-quant-worktree/freqtrade/__init__.py",
+    "history_root": "/workspace/scratch/53a27f12d2db/btc-runtime/btc-quant-research-20261010"
+  },
+  "dependencies": {
+    "python": "3.12.14",
+    "packages": {
+      "freqtrade": "2026.9",
+      "pandas": "3.0.6",
+      "numpy": "2.4.6",
+      "requests": "2.34.2",
+      "ccxt": "4.5.84",
+      "TA-Lib": "0.8.0"
+    }
+  },
+  "shared_frozen_assumptions": {
+    "id": "BTC_T1_B1_FIXED_RESEARCH_V1_20261016",
+    "status": "research spike only, not adopted, no live execution",
+    "capital": 1000,
+    "instrument": "Bitget BTCUSDT USDT-FUTURES linear perpetual, not spot",
+    "candidates": [
+      "CASH: always cash, no assumed interest",
+      "HOLD: buy 90% of initial equity at first open then hold until end",
+      "T1: long when completed UTC daily close > SMA50 including that closed day, flat when below, equality preserves prior state",
+      "B1: long when completed UTC daily close > maximum high of prior20 complete UTC days excluding current; flat when close < minimum low of prior10 days excluding current; otherwise keep state"
+    ],
+    "initial_state": "T1/B1 start simulation according to causally precomputed daily state available at window start, using earlier data only as warmup. B1 state starts flat until first valid breakout. Fully complete contiguous UTC daily bars only. No price targets, trailing stops, shorts or pyramiding. Position may be held indefinitely until defined daily exit or test end.",
+    "sizing": "At each flat-to-long entry, use <=90% of current equity for notional inclusive entry fee, floor quantity0.0001BTC; all entry funds are own cash. No borrowing, external funds, leverage. Hold fixed quantity between signals. HOLD same initial90%; CASH zero exposure. Actual realized exposures differ, compare them explicitly.",
+    "risk": "No20USDT stop guarantee; original20 all-cost single-trade budget is not satisfied by these research hypotheses. Cash headroom=equity-minus-notional must remain>=0; if funding exhausts it, terminate INVALID_NO_LEVERAGE with true stop time; not exchange liquidation. Unknown historical contract/minimum order/margin rules preclude live suitability.",
+    "timing": "Compute signal after complete UTC daily close. D0 execute immediately at next hourly open at that boundary. D1 execute one hour later. Initial window entry also delayed one hour in D1 for all noncash strategies. Next-open proxies are not actual :03 bid/ask. Delayed decision cannot change retroactively. Funding occurs before timestamp trades on previously held quantity.",
+    "fees": "Taker0.0006 per side assumption; adverse spread/slippage combined0.0002 baseline,0.0005stress; not verified account fees. Same terminal liquidation fee/slippage for every held strategy.",
+    "funding": "Actual rates270 events 2026-07-13 00UTC to2026-10-10 16UTC, same-hour mark open proxy. Require continuous8h rates and hourlymark. Outside coverage no actualnet claims; separate constant +1bp/+2bp per8h sensitivity. Missing rates never zero.",
+    "windows": "Primary actual-funded 2026-07-13 00UTC–2026-10-10 17UTC exclusiveend. Secondary full withwarmup 2023-12-01 00UTC–2026-10-10 18UTC and fixed nonoverlap subperiods ending2024-10-10 18UTC,2025-10-10 18UTC,2026-10-10 18UTC. All data previously viewed; no fresh out-of-sample or prospective sample.",
+    "scenario_count": "4 candidates x4 actual execution scenarios (baseline,slip5bp,delay1h,both), plus4 windows x2 assumed-funding scenarios x4 candidates. No parameter grid, no selecting highest and declaring adopted.",
+    "metrics": "Net equity, relative matchedHOLD andCASH, hourly marked drawdown/recovery and unrecovered duration, exposure, turnover, fees/slippage/funding, trades; invalid partial runs not ranked as fullperformance.",
+    "falsification": "Insufficient sample, underperformance after costs, no consistent risk-adjusted advantage across fixed windows, fee/delayfragility, or missingfunding => no adoption. Code/testreconciliation is separate from economic viability.",
+    "preserve": "No modifications to prior SRv1/core-tactical files, production,Google,accounts,schedules,repo orremote. New isolated research artifacts only."
+  },
+  "source": {
+    "base_url": "https://api.bitget.com",
+    "symbol": "BTCUSDT",
+    "productType": "USDT-FUTURES",
+    "daily_boundary": "00:00 UTC, only 24 contiguous completed H1 bars",
+    "H1_boundary": "UTC hour, exclude current unclosed bar",
+    "freshness_seconds": 60,
+    "future_tolerance_ms": 2000
+  },
+  "files": {
+    "historical_cost_inputs.json": "79cb53bc7ca2436bfddd14f66ab0a38b384196ace91f16fc9ef6df5bae87bd6d",
+    "historical_inputs.json": "05cafbb57433bc5c5b032602440f12ccf3c878cf470e2bb549efa87269be8a7e",
+    "hourly_job.py": "9fa2c097228dc4fad8898233dab38536a99d2707345c5c83beb8780969260615",
+    "reference/btc-core-tactical-20261016/engine.py": "a8f0ee3cb2f0e113fd16f9094937834e9b62083e6d6e0be819b4972c150574d9",
+    "reference/btc-trend-breakout-20261016/protocol.json": "eb0171d34ce1679e55a6d2eaf3f09ed1f78e2a595edde93f6b26118613f8f2dc",
+    "reference/btc-trend-breakout-20261016/run.py": "8bbe235a5c4734187427c3815c5c593c29412aaaea24b639901be6079db59cba",
+    "reference_manifest.json": "fdb26aaa1a8e12dd6d9fbb5d656f024763e45f4c5062ff2eb2ceaff061d0f3bb",
+    "rules.py": "7c67d1d4ed4ec5fd6d8f130382104889cdea88d5753cfc9124435e4c6ddcf9bf",
+    "run_research.py": "e9893748410f9081734acbef2b3464b60175af80d5d94c821eecda7a1992de99",
+    "runtime_guard.py": "5503acdbc1ca8c4f619810c5e016ac3789b2bd612367f3b14a9084752e942540",
+    "signal_report.py": "49b0f27eec83022eff2b53fe2e9b58c94865b4b64ab006b63c7ad7bd6ec79518",
+    "tests/test_hourly_job.py": "5fb8b8c189741284c62ac7f52e5e9942f414d4dd299c84594664cea3653e52b6",
+    "tests/test_integration.py": "e8e3dfa60a8602f15461401010ff07c9bcd6b60480aacfb4c6aa83b3c01fb806",
+    "tests/test_runtime_lock.py": "8e2cd9f0c80d4e9d4bc9ee63a3c61b0ce45ff1468444e883cf59d8f39c73f266",
+    "tests/test_signal_report.py": "827fa178ae3346c3b7f78ff097997bc986adbe605b60416ac5e2032a9f8847df",
+    "user_data/strategies/FrozenDailyResearch.py": "8a407b0e9362a24aec09cbd45ea6b120fb46630a0256ad6bedef03005a00a63b",
+    "tests/test_mark_source.py": "f0513fe7dfd009a680c5193d751fe17b5900166f6fca9ae2ac7475dce7626c28",
+    "../daily-review-v1/daily_review.py": "2697bbcf04528f28eab6f0b52950a0ec5d9c6cd58f81b8260a0206f55a28e19e",
+    "../daily-review-v1/tests/test_mark_source.py": "9a6c4516471d7c7be1fcac95da0b290b877738172bdf1e7ae663972e52385146",
+    "../daily-review-v1/tests/test_replay_compatibility.py": "4de7ae6542d3f127950910e5ff0d6059b4dd8984f406c4cf53098fe0b6400217",
+    "../daily-review-v1/tests/fixtures/runtime_v3_before_mark_fix.json": "07e516424051a04c1c15e3bb71a9b2c816ac2f8c091e19f551b3c738fd367c53",
+    "st_engine.py": "e7c47d24134c2e63c6d7c76c1dc6fe3cf2461c6581d5c45a330b55c1068bcf96",
+    "st_signals.py": "594f0ed8ad5e64be5e941b4c3de36c7c3d913d6e6f6fb8635d0a1b521c4e0399",
+    "st_indicators.py": "2ef16c80831597c34695b3f7d21f89f191314cb59c3b495a8e4a662db8bc86ef",
+    "st_runtime.py": "fdf762ae8e1ca5b14b4d273b0a072063c1919fade19fff40b7fd84deadb883b1",
+    "st_protocol.json": "a3444d76f42f58f04643def6ac92e1dc1e0d4430112cb38da5409beafcc6f6f5",
+    "st_original_protocol.json": "389a5bdd3c72840fc6f45f1b85228420d48b6a7b667ef18bac8173fd9762ec92",
+    "st_compatibility.json": "a5e5886522413ac9d887614cb5dfe89c0a2e20ee83bc3746160c0f9877b95b14",
+    "reference/st-approved/engine.py": "0cf4002aee139c8fb8dae0eb76e695eb77dad571a765bb28128cdf8cb7df873c",
+    "reference/st-approved/public_candidates.py": "9eee745df9b55984f9b2ef2e03a8cc7618d84f421d9ef57435708b00ca70e67d",
+    "reference/st-approved/run_research_v3.txt": "d8ba1d1222e454e29988c00b371c9a67f9b7e120cea14706e1bf472090497b78",
+    "reference/st-approved/indicators.py": "2ef16c80831597c34695b3f7d21f89f191314cb59c3b495a8e4a662db8bc86ef",
+    "reference/st-approved/runtime_v3_before_st.json": "0b42704c1a90f3719bdbee7a62ddc48fbf1017397346b75bc2ba22fe7a841d50",
+    "tests/test_st_continuous.py": "c6d6440a0925585001e82f0eefb614c6002686a85bdbd3e10386a33eabcf68b0",
+    "tests/test_st_st_contract.py": "d8f166b334237db0fa39ce176295350f1794e81d906bf689cd16c62540d8de69",
+    "../daily-review-v1/PROTOCOL.json": "2a5ded1d9525284b050c44f02932d85f19d0aa70d7c9df2931b4e42539260bce",
+    "research_execution.py": "325d4249e48a899053cef8ce7d2361dcb6e2525c9b3424924cc281c42662ebe6",
+    "tests/test_research_execution.py": "dd28de26ec209a131f00c90dbb08a2b26937e70a79d259fc575fadcac6d54c65",
+    "../daily-review-v1/ST_ACTIVATION.json": "3b04be4716c01e0320d9c9191817d0900e597d8634323d7036ea95090c8b7938",
+    "../daily-review-v1/tests/test_branch_isolation.py": "27fec43650d95f55202e414d82ecbbb3574428abee72e6f2b2b2d8cfc0bf8375",
+    "../daily-review-v1/tests/test_st_day_events.py": "f0a532fb00d9eae073a8acce76729f0a3950808baef4b6b0a08b872eb43bf746",
+    "../daily-review-v1/evaluate_candidate.py": "7c94d1d265cba6be20c09f8fe31f3f4492514d950506bbf04cccf9a5626cf797",
+    "../daily-review-v1/candidate_registry.py": "264184e215733ec25ab3cc2b727693f43ee0c1662519d0b8fa5882fcadea2989",
+    "../daily-review-v1/tests/test_evaluate_candidate.py": "40fc765084dbe046f5b4e04c1709bd62885be50f0ea0bc0c6bbc186600225b1a",
+    "../daily-review-v1/tests/test_candidate_registry.py": "ca0e7f41638cebe1c497bf19ea8375dd3e00dad6e3471be89e6cf9db8c01fe37",
+    "signal_advice.py": "20b4c275aef8693f39daa2f10faf63744167d050b7f9afd26511e368a0d0f6e2",
+    "tests/test_signal_advice.py": "88ad1aa3ccdacf9f9d83f9300ccfa191f9f156d3c2ba4a9c9a448981ed71d86a",
+    "tests/test_advice_presentation.py": "1fb3e364372666a5f0d9650eddbf1e216db56473784ec1b30f977f734c115901",
+    "tests/test_public_pagination.py": "9b611198a3c83d2d1b2b137540a11b9459667c70317056378ee99019d299cb63",
+    "pagination_compatibility.json": "d83e8eb42c1a66a45f00fdcc591aa432db16ed52cfabe37895e2738502587133",
+    "reference/pagination-approved/run_research_before.py.txt": "46867456925b03e85c8290bcf09da32ed74956a8470ef7f7a073561011ece15b",
+    "../daily-review-v1/tests/test_pagination.py": "24bbff89a58705b43376b5b62b1daf1b273d91ce5ecc9c8f80defb950d8e7414",
+    "../daily-review-v1/tests/fixtures/runtime_before_pagination.json": "7de5d25f18a329e79feacf446f54c1e8abf4fdaa87556c1d43dc341d68d95893",
+    "public_transport.py": "a1767771750b29c4f5d357fa94e62649af1f8cecf15bc0a5ebc4e567b606c21c",
+    "transport_compatibility.json": "7d1b1f94e2f4a0aec167d49174dd12777331ccd2ef30bde21258fbdbb103f7dd",
+    "reference/transport-approved/run_research.py.txt": "00c54e840378b00ac315e36bec73dcdf63a2576f7559ac601142f20126099ff0",
+    "reference/transport-approved/runtime_manifest.json.txt": "606756966b0d14004bfb3949551e9998f691da2cffe323555a6a2bff0b1cdb04",
+    "reference/transport-approved/daily_review.py.txt": "20df1bcc813f47c360faf5e080e17d4e7a4cd91643c3a9fcd35989aff0a5d034"
+  },
+  "technical_revision": {
+    "id": "MARK_SOURCE_CASE_FIX_20261018",
+    "authorized_by": "Sentinel_68ad26049f588191b53f0ee7f6062b70",
+    "scope": "Historical mark source bugfix only: candles kLineType MARK -> mark; economic rules and native signal logic unchanged.",
+    "previous_manifest_sha256": "07e516424051a04c1c15e3bb71a9b2c816ac2f8c091e19f551b3c738fd367c53",
+    "applied_utc": "2026-10-18T08:23:34.716868+00:00",
+    "compatibility_followup": {
+      "id": "KNOWN_MARK_FETCH_SIGNAL_REPLAY_20261018",
+      "previous_manifest_sha256": "0f46b6bf8ab1b03d06c4215bc7cb51205ab58646f5fdd1f7820a6b51a1379c84",
+      "scope": "Only exact approved old/new fetch source hash pair, byte-equivalence after one request literal, exact old runtime manifest, unchanged other source and original trade-bar signal equality; unknown differences denied",
+      "applied_utc": "2026-10-18T08:29:55.900626+00:00"
+    },
+    "st_research_extension": {
+      "id": "ST_HOURLY_RESEARCH_EXTENSION_20261019",
+      "authorized_by": "Sentinel_e1f6c3f614f08191b1a16f4057fb41f9",
+      "previous_manifest_sha256": "0b42704c1a90f3719bdbee7a62ddc48fbf1017397346b75bc2ba22fe7a841d50",
+      "scope": "Add ST independent research signal and continuous ledger; T1/B1 economics unchanged; explicitly approved research tracking only; no order/account/schedule changes",
+      "applied_utc": "2026-10-19T06:17:48.934464+00:00"
+    },
+    "research_output_extension": {
+      "id": "RESEARCH_EXECUTION_PRESENTATION_V1_20261019",
+      "authorized_by": "Sentinel_5db02deed91c8191bb564b255680fd15",
+      "previous_manifest_sha256": "e083aec265314acea4d6d025ed708dcf6769aa8e3cd4338cb6f9422d0c658578",
+      "scope": "Presentation only; hourly decision adds research execution provenance, separate account eligibility; all economic and signal sources unchanged",
+      "applied_utc": "2026-10-19T07:11:20.788051+00:00"
+    },
+    "signal_advice_extension": {
+      "id": "MANUAL_SIGNAL_ADVICE_PRESENTATION_20261019",
+      "previous_manifest_sha256": "acbc5e163a61265c7124215fdd7a0d53fa6c2ccd4ccaa5b02fb58e7a9b06f10e",
+      "scope": "Approved voice instruction: current quote and true new signal advice; no account orders, no new ledger; economic/signal/data sampling sources unchanged. Allocation labels reuse frozen research rules only.",
+      "authorized_by": "2026-10-19 voice: 嗯。行,那就按照这个... 来调...来调整吧",
+      "applied_utc": "2026-10-19T08:50:15.774577+00:00"
+    },
+    "advice_clarity_extension": {
+      "id": "ADVICE_TARGET_ACTION_SEPARATION_20261019",
+      "authorized_by": "Sentinel_4649a98e12a48191a4f52e56bf8853fc",
+      "previous_manifest_sha256": "a70821184738051306d01718e5ce64e4a72e18f4d968d31856fafb87c2d95c01",
+      "scope": "Add non-mutating display projection only; separate strategy target from new advice; prioritize exceptional coverage, historical and repeated events. All prior fields, economics, signals, market sampling and ledgers unchanged.",
+      "applied_utc": "2026-10-19T19:22:41.138460+00:00"
+    },
+    "runtime_path_migration": {
+      "id": "CLOUD_WRITABLE_RUNTIME_PATHS_20261026",
+      "authorized_by": "Sentinel_f62fd69250cc8191bec7a74b4b02590c",
+      "authorization_utc": "2026-10-26T03:44:46Z",
+      "previous_manifest_sha256": "151c15161e1f02e04b8dfa7195f173dbe0b626a31f57a2257382b3e14390e915",
+      "verified_source_commit": "620bb04c5a299f8361f3b4ab8ec178d4d97cff11",
+      "scope": "Paths-only technical restoration in authorized writable cloud workspace; four absolute runtime paths and two fixture path expressions changed. All production, signal, economic, source-guard, historical-input hash and checkpoint logic bytes unchanged. Old source, manifest and archived evidence preserved. No ledger initialization, failed-round replay, market fetch, schedule identity, economics or notification change.",
+      "changed_test_paths": [
+        "tests/test_integration.py",
+        "tests/test_st_continuous.py"
+      ],
+      "applied_utc": "2026-10-26T03:48:11.031794+00:00"
+    },
+    "public_pagination_repair": {
+      "id": "PUBLIC_PAGINATION_REPAIR_20261115",
+      "authorized_by": "Sentinel_c6b47a8d75a08191bb8ddc7b1ec12e41",
+      "previous_manifest_sha256": "7de5d25f18a329e79feacf446f54c1e8abf4fdaa87556c1d43dc341d68d95893",
+      "scope": "Public funding pagination and H1 pagination only; raw responses retained, derived window separately indexed; frozen economics unchanged; current H1 endpoint retains explicit83-day limit; not perpetual incremental maintenance",
+      "applied_utc": "2026-11-15T06:17:58.745007+00:00"
+    }
+  },
+  "st_research": {
+    "version": "ST_H1_LO_V1_CONTINUOUS_RESEARCH_20261019",
+    "strategy": "ST-H1-LO-v1",
+    "authorized_by": "Sentinel_e1f6c3f614f08191b1a16f4057fb41f9",
+    "status": "APPROVED_HOURLY_RESEARCH_TRACKING_NOT_ECONOMICALLY_VALIDATED",
+    "signal": "Frozen Supertrend ATR10 Wilder, multiplier3, flip-only long/cash. No stop reentry until a later down-to-up flip.",
+    "capital": 1000,
+    "risk": "Frozen original risk layer:0.5% planned risk,2ATR14 fixed stop,90% fee-inclusive nominal cap,0.0001BTC step,5USDT minimum,0.1price tick,fee6bp/side and adverse slip2bp/side,actual funding before open actions; not account budget/fees.",
+    "continuity": "Fixed start2026-07-13 UTC. First round reconstructs research ledger and emits INITIALIZED, not a real-time entry. Later rounds process new closed H1 plus current open-only boundary, exactly once. No terminal liquidation, no daily resetting.",
+    "source_protocol_sha256": "389a5bdd3c72840fc6f45f1b85228420d48b6a7b667ef18bac8173fd9762ec92",
+    "source_engine_sha256": "0cf4002aee139c8fb8dae0eb76e695eb77dad571a765bb28128cdf8cb7df873c",
+    "not_adopted_for_account_execution": true,
+    "orders_enabled": false,
+    "hourly_stop_execution": "Historical closed-bar reconstruction; not a hosted realtime stop",
+    "evidence": "Full ledger checkpoint, immutable input prefix hashes, preceding COMPLETE archive/checkpoint references, source snapshot and raw public responses"
+  }
+}

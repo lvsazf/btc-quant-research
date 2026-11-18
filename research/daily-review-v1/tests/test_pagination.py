@@ -51,6 +51,9 @@ class PaginationTests(unittest.TestCase):
    b=old if n=='run_research.py' else (d.BASE/n).read_bytes()
    p['files']['source/'+n]=dict(content=b.decode(),sha256=d.sha(b))
   p['files']['source/runtime_manifest.json']=dict(content=raw.decode(),sha256=d.sha(raw))
-  self.assertEqual(d.replay_compatibility(p,names)['status'],'KNOWN_PAGINATION_FETCH_ONLY')
+  r=d.replay_compatibility(p,names)
+  if r['status']=='KNOWN_SESSION_TRANSPORT_ONLY':r=r['proof']['prior_compatibility']
+  if r['status']=='KNOWN_BOUNDED_TRANSPORT_ONLY':r=r['proof']['prior_compatibility']
+  self.assertEqual(r['status'],'KNOWN_PAGINATION_FETCH_ONLY')
   p['files']['source/runtime_manifest.json']['content']+=' '
   self.assertEqual(d.replay_compatibility(p,names)['status'],'UNSUPPORTED')

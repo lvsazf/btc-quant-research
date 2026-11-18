@@ -15,7 +15,7 @@ class ReplayCompatibility(unittest.TestCase):
   return dict(files=files),names
  def test_known_only_fetch_diff_allowed(self):
   p,n=self.fixture();x=d.replay_compatibility(p,n)
-  self.assertIn(x['status'],('KNOWN_MARK_FETCH_ONLY','KNOWN_ST_RESEARCH_EXTENSION','KNOWN_PAGINATION_FETCH_ONLY'));self.assertEqual(x['changed_files'],['run_research.py'])
+  self.assertIn(x['status'],('KNOWN_MARK_FETCH_ONLY','KNOWN_ST_RESEARCH_EXTENSION','KNOWN_PAGINATION_FETCH_ONLY','KNOWN_BOUNDED_TRANSPORT_ONLY','KNOWN_SESSION_TRANSPORT_ONLY'));self.assertEqual(x['changed_files'],['run_research.py'])
  def test_unknown_run_hash_rejected(self):
   p,n=self.fixture();x=p['files']['source/run_research.py'];x['content']+='\n# unknown\n';x['sha256']=d.sha(x['content'].encode())
   self.assertEqual(d.replay_compatibility(p,n)['status'],'UNSUPPORTED')

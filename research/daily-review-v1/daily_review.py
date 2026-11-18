@@ -50,8 +50,46 @@ def replay_compatibility(p,required,_run_override=None):
  # Current and archived whole-file hashes plus exact native function equality are required.
  transition=json.loads((BASE/'st_compatibility.json').read_text())
  current_run=_run_override if _run_override is not None else (BASE/'run_research.py').read_bytes()
+ session=BASE/'session_compatibility.json'
+ if session.is_file():
+  try:
+   tr=json.loads(session.read_text())
+   if sha(current_run)==tr['new_run_research_sha256']:
+    archived=p['files']['source/run_research.py']['content'].encode()
+    if archived!=current_run:
+     old=(BASE/tr['previous_source_path']).read_bytes();mr=p['files']['source/runtime_manifest.json']['content'].encode()
+     pair={'source_sha256':sha(archived),'manifest_sha256':sha(mr)}
+     if pair not in tr['allowed_old_pairs']:raise ValueError('Unknown session source/manifest pair')
+     if sha(old)!=tr['previous_run_research_sha256']:raise ValueError('Session reference mismatch')
+     def native_part(raw):return raw[raw.index(b'def native_signals('):raw.index(b'def fetch(')]
+     if native_part(old)!=native_part(current_run):raise ValueError('Session native signal drift')
+     prior=replay_compatibility(p,required,old)
+     if prior['status']=='UNSUPPORTED':return prior
+     frozen=json.loads(mr)
+     if sha(mr)!=p['files']['source/runtime_manifest.json']['sha256'] or any(frozen['files'].get(n)!=p['files']['source/'+n]['sha256'] for n in required):raise ValueError('Session archived manifest disagreement')
+     return dict(status='KNOWN_SESSION_TRANSPORT_ONLY',changed_files=['run_research.py'],proof=dict(old_source_sha256=sha(archived),new_source_sha256=sha(current_run),prior_compatibility=prior))
+  except (KeyError,ValueError,TypeError,OSError) as e:return dict(status='UNSUPPORTED',reason=str(e))
+ transport=BASE/'transport_compatibility.json'
+ if transport.is_file():
+  try:
+   tr=json.loads(transport.read_text())
+   if sha(current_run)==tr['new_run_research_sha256']:
+    archived=p['files']['source/run_research.py']['content'].encode()
+    if archived!=current_run:
+     old=(BASE/tr['previous_source_path']).read_bytes();mr=p['files']['source/runtime_manifest.json']['content'].encode()
+     pair={'source_sha256':sha(archived),'manifest_sha256':sha(mr)}
+     if pair not in tr['allowed_old_pairs']:raise ValueError('Unknown transport source/manifest pair')
+     if sha(old)!=tr['previous_run_research_sha256']:raise ValueError('Transport reference mismatch')
+     def native_part(raw):return raw[raw.index(b'def native_signals('):raw.index(b'def fetch(')]
+     if native_part(old)!=native_part(current_run):raise ValueError('Transport native signal drift')
+     prior=replay_compatibility(p,required,old)
+     if prior['status']=='UNSUPPORTED':return prior
+     frozen=json.loads(mr)
+     if sha(mr)!=p['files']['source/runtime_manifest.json']['sha256'] or any(frozen['files'].get(n)!=p['files']['source/'+n]['sha256'] for n in required):raise ValueError('Transport archived manifest disagreement')
+     return dict(status='KNOWN_BOUNDED_TRANSPORT_ONLY',changed_files=['run_research.py'],proof=dict(old_source_sha256=sha(archived),new_source_sha256=sha(current_run),prior_compatibility=prior))
+  except (KeyError,ValueError,TypeError,OSError) as e:return dict(status='UNSUPPORTED',reason=str(e))
  pagination=BASE/'pagination_compatibility.json'
- if _run_override is None and pagination.is_file():
+ if pagination.is_file():
   try:
    tr=json.loads(pagination.read_text())
    if sha(current_run)==tr['new_run_research_sha256']:

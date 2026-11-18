@@ -4,6 +4,7 @@ from pathlib import Path
 from bisect import bisect_right
 import pandas as pd
 import requests
+from public_transport import attempt_get,set_deadline,session_get,close_sessions
 from freqtrade.enums import RunMode
 from freqtrade.resolvers import StrategyResolver
 import freqtrade
@@ -32,13 +33,15 @@ def native_signals(bars,name):
  return frame,strategy
 
 def fetch(out,name,endpoint,params):
- start=datetime.datetime.now(UTC);r=requests.get('https://api.bitget.com'+endpoint,params=params,timeout=30);end=datetime.datetime.now(UTC)
- (out/(name+'.json')).write_bytes(r.content)
- try:body=r.json()
- except Exception:body={}
- save(out/(name+'.metadata.json'),dict(url=r.url,http_status=r.status_code,code=body.get('code'),server_requestTime=body.get('requestTime'),requested_utc=start.isoformat(),received_utc=end.isoformat(),requested_beijing=start.astimezone(datetime.timezone(datetime.timedelta(hours=8))).isoformat(),received_beijing=end.astimezone(datetime.timezone(datetime.timedelta(hours=8))).isoformat(),sha256=hashlib.sha256(r.content).hexdigest()))
- if r.status_code!=200 or body.get('code')!='00000':raise RuntimeError('Invalid public data: '+name)
- return body
+ start=datetime.datetime.now(UTC);r=attempt_get(out,name,'https://api.bitget.com'+endpoint,params,session_get);end=datetime.datetime.now(UTC)
+ try:
+  (out/(name+'.json')).write_bytes(r.content)
+  try:body=r.json()
+  except Exception:body={}
+  save(out/(name+'.metadata.json'),dict(url=r.url,http_status=r.status_code,code=body.get('code'),server_requestTime=body.get('requestTime'),requested_utc=start.isoformat(),received_utc=end.isoformat(),requested_beijing=start.astimezone(datetime.timezone(datetime.timedelta(hours=8))).isoformat(),received_beijing=end.astimezone(datetime.timezone(datetime.timedelta(hours=8))).isoformat(),sha256=hashlib.sha256(r.content).hexdigest()))
+  if r.status_code!=200 or body.get('code')!='00000':raise RuntimeError('Invalid public data: '+name)
+  return body
+ finally:r.close()
 
 def check_fresh(timebody,tickerbody):
  now=int(datetime.datetime.now(UTC).timestamp()*1000)
@@ -88,7 +91,7 @@ def fetch_candle_window(out,name,common,start,cut,kind):
   cursor=end+H;page+=1
  return dict(first,data=[rows[t] for t in sorted(rows)])
 
-def main():
+def _main():
  ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('mode',choices=['historical','current']);ap.add_argument('--history-root',type=Path,required=True);ap.add_argument('--output',type=Path,required=True);ap.add_argument('--st-previous',type=Path);args=ap.parse_args()
  from runtime_guard import verify_runtime
  runtime=verify_runtime();print(json.dumps({'preflight':runtime},ensure_ascii=False),flush=True)
@@ -96,6 +99,7 @@ def main():
  result=dict(runtime=runtime,version=VERSION,adopted=False,status='RESEARCH_ONLY_NOT_ADOPTED',mode=args.mode,started_utc=started.isoformat(),freqtrade_version=freqtrade.__version__,loaded_freqtrade=freqtrade.__file__,rule_manifest=MANIFEST,native_execution='signal interface integrated; native default order/cost ledger blocked and NOT equivalent-certified',orders_enabled=False,formal_A_signal=False)
  try:
   if args.mode=='current':
+   set_deadline(210)
    raw=args.output/'raw';raw.mkdir();t=fetch(raw,'time_initial','/api/v2/public/time',{});server=int(t['data']['serverTime']);cut=server//H*H
    common=dict(symbol='BTCUSDT',productType='USDT-FUTURES')
    cost_spec=json.loads((ROOT/'historical_cost_inputs.json').read_text())[1]
@@ -151,4 +155,7 @@ def main():
   result.update(status='BLOCKED_RESEARCH_NO_SIGNAL',error=repr(e),native_signal_checks={});save(args.output/'result.json',result);raise
  result['integration_hashes']={str(p.relative_to(ROOT)):sha(p) for p in ROOT.rglob('*.py') if '__pycache__' not in p.parts}
  save(args.output/'result.json',result);print(json.dumps(result,ensure_ascii=False,indent=2,default=str))
+def main():
+ try:return _main()
+ finally:close_sessions()
 if __name__=='__main__':main()
